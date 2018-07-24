@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5522070698309151784}
   - component: {fileID: 3374364016667392228}
   m_Layer: 0
-  m_Name: Rim
+  m_Name: NegZ
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -184,7 +184,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controllerObject: {fileID: 0}
-  cover: 0
+  minHeight: 0.05
+  baseHeight: 0.5
   gridPos: {x: 0, y: 0}
 --- !u!1 &4924120814698835171
 GameObject:
@@ -198,7 +199,7 @@ GameObject:
   - component: {fileID: 8616445396585688914}
   - component: {fileID: 8099540138583388053}
   m_Layer: 0
-  m_Name: Rim
+  m_Name: PosZ
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -274,7 +275,7 @@ GameObject:
   - component: {fileID: 860010538011850155}
   - component: {fileID: 8489379658209410564}
   m_Layer: 0
-  m_Name: Rim
+  m_Name: NegX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -350,7 +351,7 @@ GameObject:
   - component: {fileID: 7653568217393924054}
   - component: {fileID: 3748686326784425606}
   m_Layer: 0
-  m_Name: Rim
+  m_Name: PosX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

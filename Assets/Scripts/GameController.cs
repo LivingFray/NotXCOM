@@ -3,7 +3,7 @@ using System;
 
 public class GameController : MonoBehaviour {
 
-    float[,] heightmap;
+    TileController[,] heightmap;
 
     public int width = 20;
     public int height = 20;
@@ -13,6 +13,7 @@ public class GameController : MonoBehaviour {
     public float baseTileHeight = 0.1f;
 
     public Material baseMaterial;
+    public Material darkMaterial;
     public Material startMaterial;
     public Material endMaterial;
 
@@ -28,9 +29,16 @@ public class GameController : MonoBehaviour {
 
     public GameObject line;
 
-    public bool clearLOS;
+    public bool clearLOS = true;
 
     public bool HasLineOfSightDDA(Vector2Int start, Vector2Int end, out float cover) {
+        //Iterate from start position to end position, checking for blocking cover
+        //TODO: Allow for stepping out
+        //Full cover between blocks completely
+        //Half cover between doesn't block but increases cover value
+        //No cover between causes flanks
+
+        //TODO: Fix 45 degree being dependant on direction
         ClearLOS();
         line.GetComponent<LineRenderer>().SetPosition(0, new Vector3(start.x, 1.0f, start.y));
         line.GetComponent<LineRenderer>().SetPosition(1, new Vector3(end.x, 1.0f, end.y));
@@ -54,134 +62,120 @@ public class GameController : MonoBehaviour {
 
         cover = 0;
 
+        int oldGridX;
+        int oldGridY;
+
         while (stillSearching) {
-            if(maxX < maxY) {
+            oldGridX = gridX;
+            oldGridY = gridY;
+            //Which face of the tile was passed through
+            //0 = NegX, 1 = PosX, 2 = NegZ, 3 = PosZ
+            int faceCurrent;
+            int faceNext;
+            if (maxX < maxY) {
+                //Change in X
+                if (stepX < 0) {
+                    faceCurrent = 0;
+                    faceNext = 1;
+                } else {
+                    faceCurrent = 1;
+                    faceNext = 0;
+                }
                 maxX += deltaX;
                 gridX += stepX;
             } else {
+                if (stepY < 0) {
+                    faceCurrent = 2;
+                    faceNext = 3;
+                } else {
+                    faceCurrent = 3;
+                    faceNext = 2;
+                }
                 maxY += deltaY;
                 gridY += stepY;
             }
+            //Update current tile
+            UpdateEdges(new Vector2Int(oldGridX, oldGridY), faceCurrent);
+            //Update next tile
+            UpdateEdges(new Vector2Int(gridX, gridY), faceNext);
+            //Break out if we hit the goal
             stillSearching = gridX != end.x || gridY != end.y;
             if (stillSearching) {
-                float height = heightmap[gridX, gridY];
+                //Current face
+                float height = heightmap[oldGridX, oldGridY].cover.GetCover(faceCurrent);
                 cover = Mathf.Max(cover, height);
-                //Debug
-                GameObject tile = GetTile(new Vector2Int(gridX, gridY));
-                tile.GetComponent<Renderer>().material = checkingMaterial;
-
+                //Next face
+                height = heightmap[gridX, gridY].cover.GetCover(faceNext);
+                cover = Mathf.Max(cover, height);
+                //Check for cover
                 if (cover >= 1.0f) {
                     return false;
                 }
             }
         }
-
-        return true;
-
-    }
-
-    public bool HasLineOfSight(Vector2Int start, Vector2Int end, out float cover) {
-        ClearLOS();
-        line.GetComponent<LineRenderer>().SetPosition(0, new Vector3(start.x, 1.0f, start.y));
-        line.GetComponent<LineRenderer>().SetPosition(1, new Vector3(end.x, 1.0f, end.y));
-        //Iterate from start position to end position, checking for blocking cover
-        //TODO: Allow for stepping out
-        //Full cover between blocks completely
-        //Half cover between doesn't block but increases cover value
-        //No cover between causes flanks
-
-        //Implementation of DDA algorithm
-        float deltaX = end.x - start.x;
-        float deltaY = end.y - start.y;
-        float step;
-        if (Mathf.Abs(deltaX) >= Mathf.Abs(deltaY)) {
-            step = Mathf.Abs(deltaX);
-        } else {
-            step = Mathf.Abs(deltaY);
-        }
-
-        deltaX /= step;
-        deltaY /= step;
-
-        float x = start.x;
-        float y = start.y;
-        //Skip initial step (don't care about start tile)
-        x += deltaX;
-        y += deltaY;
-
-        cover = 0;
-
-        for (int i = 1; i < step; i++) {
-            int intX = Mathf.RoundToInt(x);
-            int intY = Mathf.RoundToInt(y);
-            float height = heightmap[intX, intY];
-            cover = Mathf.Max(cover, height);
-
-            //Debug
-            GameObject tile = GetTile(new Vector2Int(intX, intY));
-            tile.GetComponent<Renderer>().material = checkingMaterial;
-
-            if (cover >= 1.0f) {
-            //    return false;
-            }
-            x += deltaX;
-            y += deltaY;
-        }
-
         return true;
     }
 
-
-    public void SetTileHeight(Vector2Int pos, float height) {
-        GameObject selectedTile = GetTile(pos);
-        if (!selectedTile) {
-            Debug.LogWarning("Tile at pos " + pos + " not found");
-            return;
+    void UpdateEdges(Vector2Int pos, int edge) {
+        string edgeName;
+        switch (edge) {
+            case 0:
+                edgeName = "NegX";
+                break;
+            case 1:
+                edgeName = "PosX";
+                break;
+            case 2:
+                edgeName = "NegZ";
+                break;
+            case 3:
+                edgeName = "PosZ";
+                break;
+            default:
+                edgeName = "ERR";
+                break;
         }
-        selectedTile.transform.localScale = new Vector3(1.0f, baseTileHeight + height, 1.0f);
-        selectedTile.transform.localPosition = new Vector3(pos.x, (baseTileHeight + height) / 2.0f, pos.y);
-        heightmap[pos.x, pos.y] = height;
-        TileController tCon = selectedTile.GetComponent<TileController>();
-        if (!tCon) {
-            Debug.LogError("Tile lacks controller");
-            return;
+        GameObject tile = GetTile(pos);
+        if (!tile) {
+            Debug.LogError("No tile");
         }
-        tCon.cover = height;
+        Transform edgeTransform = tile.transform.Find(edgeName);
+        if (!edgeTransform) {
+            Debug.LogError("No edge with name " + edgeName);
+        }
+        edgeTransform.gameObject.GetComponent<Renderer>().material = checkingMaterial;
     }
 
     // Use this for initialization
     void Start() {
-        heightmap = new float[width, height];
+        heightmap = new TileController[width, height];
         for (int x = 0; x < width; x++) {
             for (int z = 0; z < height; z++) {
-                heightmap[x, z] = 0.0f;
-                GameObject newTile = Instantiate(tile, new Vector3(x, baseTileHeight / 2.0f, z), Quaternion.identity, gameObject.transform);
-                newTile.transform.localScale = new Vector3(1.0f, baseTileHeight, 1.0f);
+                GameObject newTile = Instantiate(tile, new Vector3(x, 0.0f, z), Quaternion.identity, gameObject.transform);
                 newTile.name = x + "," + z;
                 TileController tCon = newTile.GetComponent<TileController>();
                 if (!tCon) {
                     Debug.LogError("Tile lacks controller");
                 }
-                tCon.cover = 0.0f;
                 tCon.gridPos = new Vector2Int(x, z);
+                heightmap[x, z] = tCon;
             }
         }
     }
 
     private void ClearLOS() {
-        if(!clearLOS) {
+        if (!clearLOS) {
             return;
         }
         for (int x = 0; x < width; x++) {
             for (int z = 0; z < height; z++) {
-                GetTile(new Vector2Int(x, z)).GetComponent<Renderer>().material = baseMaterial;
+                GameObject tileObj = GetTile(new Vector2Int(x, z));
+                foreach (Renderer child in tileObj.GetComponentsInChildren<Renderer>()) {
+                    if (child.gameObject != tileObj) {
+                        child.material = darkMaterial;
+                    }
+                }
             }
-        }
-        if (tileStart) {
-            tileStart.GetComponent<Renderer>().material = startMaterial;
-        }
-        if (tileEnd) {
-            tileEnd.GetComponent<Renderer>().material = endMaterial;
         }
     }
 
@@ -189,7 +183,7 @@ public class GameController : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.Space)) {
             placingStart = !placingStart;
         }
-        if(Input.GetKeyDown(KeyCode.LeftShift)) {
+        if (Input.GetKeyDown(KeyCode.LeftShift)) {
             ClearLOS();
         }
     }
@@ -211,7 +205,6 @@ public class GameController : MonoBehaviour {
             tileEnd.GetComponent<Renderer>().material = endMaterial;
         }
         float cover;
-        // los = HasLineOfSight(rayStart, rayEnd, out cover);
         bool los = HasLineOfSightDDA(rayStart, rayEnd, out cover);
         Debug.Log(los ? "LOS " + cover : "No LOS");
     }
