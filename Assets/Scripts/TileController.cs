@@ -5,7 +5,7 @@ public class TileController : MonoBehaviour {
     [System.Serializable]
     public class Cover {
         //I would use an array but this way looks nicer in the editor
-        float negativeX, positiveX, negativeZ, positiveZ;
+        public float negativeX, positiveX, negativeZ, positiveZ;
         public float GetCover(int side) {
             switch (side) {
                 case 0:
@@ -111,7 +111,6 @@ public class TileController : MonoBehaviour {
         Vector3 newScale = wall.localScale;
         newScale.y = Mathf.Max(minHeight, height);
         wall.localScale = newScale;
-        Debug.Log(newScale);
         Vector3 newPosition = wall.localPosition;
         newPosition.y = newScale.y / 2.0f + baseHeight;
         wall.localPosition = newPosition;

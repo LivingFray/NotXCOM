@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
-using System;
+using System.Collections;
+using System.Collections.Generic;
 
 public class GameController : MonoBehaviour {
 
@@ -31,6 +32,8 @@ public class GameController : MonoBehaviour {
 
     public bool clearLOS = true;
 
+    public float maxTraversableCover = 0.5f;
+
     public bool HasLineOfSightDDA(Vector2Int start, Vector2Int end, out float cover) {
         //Iterate from start position to end position, checking for blocking cover
         //TODO: Allow for stepping out
@@ -39,7 +42,6 @@ public class GameController : MonoBehaviour {
         //No cover between causes flanks
 
         //TODO: Fix 45 degree being dependant on direction
-        ClearLOS();
         line.GetComponent<LineRenderer>().SetPosition(0, new Vector3(start.x, 1.0f, start.y));
         line.GetComponent<LineRenderer>().SetPosition(1, new Vector3(end.x, 1.0f, end.y));
         //Get Ray direction
@@ -116,6 +118,144 @@ public class GameController : MonoBehaviour {
         return true;
     }
 
+    public Vector2Int[] FindPath(Vector2Int start, Vector2Int end) {
+        //Track visited nodes
+        List<Vector2Int> closed = new List<Vector2Int>();
+        //Track potential nodes
+        PriorityQueue<Vector2Int> open = new PriorityQueue<Vector2Int>();
+        open.Enqueue(start, 0.0f);
+        //Track best previous step
+        Dictionary<Vector2Int, Vector2Int> cameFrom = new Dictionary<Vector2Int, Vector2Int>();
+        //Track g-scores for visiting each node
+        Dictionary<Vector2Int, float> gScore = new Dictionary<Vector2Int, float>();
+        //Set cost of first node to 0
+        gScore[start] = 0.0f;
+        while (open.Count > 0) {
+            //Get node with lowest cost
+            Vector2Int current = open.Dequeue();
+            //If goal construct path
+            if (current == end) {
+                return ConstructPath(cameFrom, current);
+            }
+            //Remove current node and add to closed
+            closed.Add(current);
+            //For every neighbouring node
+            for (int x = -1; x <= 1; x++) {
+                for (int z = -1; z <= 1; z++) {
+                    //A node is not a neighbour of itself
+                    if (x == 0 && z == 0) {
+                        continue;
+                    }
+                    //No diagonals
+                    if (x != 0 && z != 0) {
+                        continue;
+                    }
+
+                    Vector2Int neighbour = current + new Vector2Int(x, z);
+                    //Skip out of bounds cells
+                    if (neighbour.x < 0 || neighbour.y < 0 || neighbour.x >= width || neighbour.y >= height) {
+                        continue;
+                    }
+
+                    //Check for walls blocking path
+                    if (!CanTraverse(current, neighbour)) {
+                        continue;
+                    }
+
+                    //If neighbour is closed, skip
+                    if (closed.Contains(neighbour)) {
+                        continue;
+                    }
+                    //Calculate distance from start to neighbour
+                    float tentG = gScore[current] + 1.0f;
+                    //Add neighbour to open if not in already
+                    if (!open.Contains(neighbour)) {
+                        open.Enqueue(neighbour, tentG + (neighbour - end).sqrMagnitude);
+                    } else if (gScore.ContainsKey(neighbour) && tentG >= gScore[neighbour]) {
+                        //Otherwise if score is greater than current, skip
+                        continue;
+                    }
+                    //Update neighbour's camefrom to this node
+                    cameFrom[neighbour] = current;
+                    //Set neighbours g-score to new calculated
+                    gScore[neighbour] = tentG;
+                }
+            }
+        }
+        return null;
+    }
+
+    Vector2Int[] ConstructPath(Dictionary<Vector2Int, Vector2Int> cameFrom, Vector2Int current) {
+        //Add current to path
+        List<Vector2Int> path = new List<Vector2Int> {
+            current
+        };
+        //While current exists in camefrom
+        while (cameFrom.ContainsKey(current)) {
+            //Set current to value in came from map
+            current = cameFrom[current];
+            //Add current to path
+            path.Add(current);
+        }
+        return path.ToArray();
+    }
+
+    bool CanTraverse(Vector2Int first, Vector2Int last) {
+        if (first.x != last.x && first.y != last.y) {
+            //These tiles aren't neighbours!
+            return false;
+        }
+        if (first.x == last.x && first.y == last.y) {
+            //Why would you want to check if a tile can reach itself?
+            return true;
+        }
+        GameObject firstObj = GetTile(first);
+        GameObject lastObj = GetTile(last);
+        //Check objects both exist
+        if (!firstObj || !lastObj) {
+            return false;
+        }
+        TileController firstTile = firstObj.GetComponent<TileController>();
+        TileController lastTile = lastObj.GetComponent<TileController>();
+        //Moving Left
+        if (last.x < first.x) {
+            if (firstTile.cover.negativeX > maxTraversableCover) {
+                return false;
+            }
+            if (lastTile.cover.positiveX > maxTraversableCover) {
+                return false;
+            }
+        }
+        //Moving Right
+        if (last.x > first.x) {
+            if (firstTile.cover.positiveX > maxTraversableCover) {
+                return false;
+            }
+            if (lastTile.cover.negativeX > maxTraversableCover) {
+                return false;
+            }
+        }
+        //Moving Down
+        if (last.y < first.y) {
+            if (firstTile.cover.negativeZ > maxTraversableCover) {
+                return false;
+            }
+            if (lastTile.cover.positiveZ > maxTraversableCover) {
+                return false;
+            }
+        }
+        //Moving Up
+        if (last.y > first.y) {
+            if (firstTile.cover.positiveZ > maxTraversableCover) {
+                return false;
+            }
+            if (lastTile.cover.negativeZ > maxTraversableCover) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     void UpdateEdges(Vector2Int pos, int edge) {
         string edgeName;
         switch (edge) {
@@ -169,10 +309,16 @@ public class GameController : MonoBehaviour {
         }
         for (int x = 0; x < width; x++) {
             for (int z = 0; z < height; z++) {
-                GameObject tileObj = GetTile(new Vector2Int(x, z));
+                Vector2Int pos = new Vector2Int(x, z);
+                if(pos == rayStart || pos == rayEnd) {
+                    continue;
+                }
+                GameObject tileObj = GetTile(pos);
                 foreach (Renderer child in tileObj.GetComponentsInChildren<Renderer>()) {
                     if (child.gameObject != tileObj) {
                         child.material = darkMaterial;
+                    } else {
+                        child.material = baseMaterial;
                     }
                 }
             }
@@ -189,6 +335,7 @@ public class GameController : MonoBehaviour {
     }
 
     public void TileClicked(Vector2Int tile) {
+        ClearLOS();
         if (placingStart) {
             if (tileStart) {
                 tileStart.GetComponent<Renderer>().material = baseMaterial;
@@ -204,9 +351,19 @@ public class GameController : MonoBehaviour {
             tileEnd = GetTile(tile);
             tileEnd.GetComponent<Renderer>().material = endMaterial;
         }
+        /*
         float cover;
         bool los = HasLineOfSightDDA(rayStart, rayEnd, out cover);
         Debug.Log(los ? "LOS " + cover : "No LOS");
+        */
+        Vector2Int[] route = FindPath(rayStart, rayEnd);
+        if (route != null) {
+            foreach (Vector2Int pos in route) {
+                if (pos != rayStart && pos != rayEnd) {
+                    GetTile(pos).GetComponent<Renderer>().material = checkingMaterial;
+                }
+            }
+        }
     }
 
     private GameObject GetTile(Vector2Int pos) {

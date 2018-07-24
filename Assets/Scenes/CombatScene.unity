@@ -204,11 +204,12 @@ MonoBehaviour:
   tile: {fileID: 3978872136747646388, guid: 1ae39056023b88645be6327d345ef66b, type: 3}
   baseTileHeight: 0.1
   baseMaterial: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  darkMaterial: {fileID: 2100000, guid: 38858ff2d41bef44296a1de9b26ea85f, type: 2}
   startMaterial: {fileID: 2100000, guid: 7344a6c4f1829ca47ae80f867b22a506, type: 2}
   endMaterial: {fileID: 2100000, guid: 3c455cb4f9a6a85478274c2cb8746175, type: 2}
   checkingMaterial: {fileID: 2100000, guid: 1f1a5dae07b07114dbdd17ce597098ed, type: 2}
   line: {fileID: 777276962}
-  clearLOS: 0
+  clearLOS: 1
 --- !u!29 &1
 OcclusionCullingSettings:
   m_ObjectHideFlags: 0
