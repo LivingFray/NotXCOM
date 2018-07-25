@@ -1,26 +1,38 @@
 ﻿using UnityEngine;
+/*
+ * Class for handling a tile. If a tile's side is blocked but the tile above
+ * isn't then it provides half cover. If a tile and the one above are blocked
+ * then it provides full cover.
+ * If the floor is blocked and ceiling isn't then the tile is walkable
+ */
+enum CoverType {NONE, HALF, FULL};
+enum CoverSides {NEGX, POSX, NEGY, POSY, NEGZ, POSZ};
 
-public class TileController : MonoBehaviour {
+public class TileController {
 
-    [System.Serializable]
+    public GameController controller;
+
     public class Cover {
-        //I would use an array but this way looks nicer in the editor
-        public float negativeX, positiveX, negativeZ, positiveZ;
-        public float GetCover(int side) {
+        public byte negativeX, positiveX, negativeY, positiveY, negativeZ, positiveZ;
+        public byte GetCover(byte side) {
             switch (side) {
                 case 0:
                     return negativeX;
                 case 1:
                     return positiveX;
                 case 2:
-                    return negativeZ;
+                    return negativeY;
                 case 3:
+                    return positiveY;
+                case 4:
+                    return negativeZ;
+                case 5:
                     return positiveZ;
                 default:
                     return 0;
             }
         }
-        public void SetCover(int side, float cover) {
+        public void SetCover(byte side, byte cover) {
             switch (side) {
                 case 0:
                     negativeX = cover;
@@ -29,9 +41,15 @@ public class TileController : MonoBehaviour {
                     positiveX = cover;
                     break;
                 case 2:
-                    negativeZ = cover;
+                    negativeY = cover;
                     break;
                 case 3:
+                    positiveY = cover;
+                    break;
+                case 4:
+                    negativeZ = cover;
+                    break;
+                case 5:
                     positiveZ = cover;
                     break;
                 default:
@@ -40,80 +58,26 @@ public class TileController : MonoBehaviour {
         }
     }
 
-    public GameObject controllerObject;
-
     public Cover cover;
 
-    public float minHeight = 0.05f;
-    public float baseHeight = 0.5f;
-
     [HideInInspector]
-    public Vector2Int gridPos;
+    public Vector3Int gridPos;
 
-    GameController controller;
+    GameObject _tile;
 
-    // Use this for initialization
-    void Start() {
-        if (!controllerObject) {
-            controllerObject = GameObject.FindGameObjectWithTag("GameController");
-        }
-        controller = controllerObject.GetComponent<GameController>();
-        if (!controller) {
-            Debug.LogError("No Controller script in controller");
-        }
+    //May or may not exist, refers to the physical representation of the tile
+    public GameObject Tile { get { return _tile; } set {
+            _tile = value;
+            _tile.GetComponent<TileInput>().tileController = this;
+        } }
+
+    public TileController(GameController controller) {
+        cover = new Cover();
+        this.controller = controller;
     }
 
-    private void OnMouseOver() {
-        if (Input.GetMouseButtonDown(1)) {
-            controller.TileClicked(gridPos);
-        }
+    public void TileClicked() {
+        controller.TileClicked(gridPos);
     }
 
-    private void OnMouseDown() {
-        //Get position clicked
-        RaycastHit hit;
-        Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit);
-        Vector3 mousePos = hit.point;
-        //Determine closest edge
-        mousePos -= transform.position;
-        int edge;
-        string edgeName;
-        if (Mathf.Abs(mousePos.x) > Mathf.Abs(mousePos.z)) {
-            if (mousePos.x > 0) {
-                edge = 1;
-                edgeName = "PosX";
-            } else {
-                edge = 0;
-                edgeName = "NegX";
-            }
-        } else {
-            if (mousePos.z > 0) {
-                edge = 3;
-                edgeName = "PosZ";
-            } else {
-                edge = 2;
-                edgeName = "NegZ";
-            }
-        }
-        float c = cover.GetCover(edge);
-        Transform wall = transform.Find(edgeName);
-        //Update height of corresponding edge
-        if (c == 0.0f) {
-            SetWallHeight(wall, 0.5f, edge);
-        } else if (c == 0.5f) {
-            SetWallHeight(wall, 1.0f, edge);
-        } else {
-            SetWallHeight(wall, 0.0f, edge);
-        }
-    }
-
-    void SetWallHeight(Transform wall, float height, int edge) {
-        Vector3 newScale = wall.localScale;
-        newScale.y = Mathf.Max(minHeight, height);
-        wall.localScale = newScale;
-        Vector3 newPosition = wall.localPosition;
-        newPosition.y = newScale.y / 2.0f + baseHeight;
-        wall.localPosition = newPosition;
-        cover.SetCover(edge, height);
-    }
 }
