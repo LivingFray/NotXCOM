@@ -216,7 +216,7 @@ public class GameController : MonoBehaviour {
         }
         Vector3Int[] retArray = new Vector3Int[path.Count];
         //Path is from end to start, so reverse it
-        for(int i = 0; i < path.Count; i++) {
+        for (int i = 0; i < path.Count; i++) {
             retArray[i] = path[path.Count - i - 1];
         }
         return retArray;
@@ -263,7 +263,7 @@ public class GameController : MonoBehaviour {
         foreach (Vector3Int offset in offsets) {
             Vector3Int offCell = offset + cell;
             //Skip the cell if it is outside the map
-            if(OutOfBounds(offCell)) {
+            if (OutOfBounds(offCell)) {
                 continue;
             }
             //Check all cells that can be jumped to aswell as walked to
@@ -274,28 +274,36 @@ public class GameController : MonoBehaviour {
                     continue;
                 }
                 //If horizontal movement is fine, add it
-                if (CanTraverse(cell + new Vector3Int(0, i, 0), n)) {
+                if (IsWalkable(n) && CanTraverse(cell + new Vector3Int(0, i, 0), n)) {
                     neighbours.Add(n);
                 }
+            }
+
+            //Check we can actually reach the air space to fall from
+            if(!CanTraverse(cell, offCell)) {
+                continue;
             }
 
             //Iterate down until OOB, at max fall distance, hit a roof, or hit a floor
             Vector3Int currentCell = offCell;
             //Only check a fixed distance down
-            for(int i = 0; i < maxFallHeight; i++) {
-                //Floor of current cell to land on found
+            for (int i = 0; i < 50; i++) {
+                //Add cell if floor of current cell exists
                 if (GetTileController(currentCell).cover.GetCover((byte)CoverSides.NEGY) == (byte)CoverType.FULL) {
-                    neighbours.Add(currentCell);
+                    //Don't add the tile if the height is unchanged
+                    Debug.Log(currentCell.y + " " + rayStart.y);
+                    if (i != 0) {
+                        neighbours.Add(currentCell);
+                    }
                     break;
                 }
-                //Haven't landed, lets see if we can go down further
                 //Drop down a cell
                 currentCell += new Vector3Int(0, -1, 0);
-                //Fell out of the map
+                //Check we didn't fall out of the map
                 if (currentCell.y < 0) {
                     break;
                 }
-                //Ceiling of new cell blocks the fall
+                //Check if ceiling of new cell blocks the fall
                 if (GetTileController(currentCell).cover.GetCover((byte)CoverSides.POSY) == (byte)CoverType.FULL) {
                     break;
                 }
@@ -305,19 +313,23 @@ public class GameController : MonoBehaviour {
         return neighbours;
     }
 
+    bool IsWalkable(Vector3Int cell) {
+        return !OutOfBounds(cell) && GetTileController(cell).cover.GetCover((byte)CoverSides.NEGY) == (byte)CoverType.FULL;
+    }
+
     bool CanTraverseVertical(Vector3Int first, Vector3Int last) {
         //Check we are still in the map
-        if(OutOfBounds(first) || OutOfBounds(last)) {
+        if (OutOfBounds(first) || OutOfBounds(last)) {
             return false;
         }
         //Ensure first is lower than last
-        if(first.y > last.y) {
+        if (first.y > last.y) {
             Vector3Int temp = first;
             first = last;
             last = temp;
         }
         //Check first tile's ceiling
-        if(GetTileController(first).cover.GetCover((byte)CoverSides.POSY) == (byte)CoverType.FULL) {
+        if (GetTileController(first).cover.GetCover((byte)CoverSides.POSY) == (byte)CoverType.FULL) {
             return false;
         }
         //Check last tile's floor
@@ -336,10 +348,6 @@ public class GameController : MonoBehaviour {
     bool CanTraverse(Vector3Int first, Vector3Int last) {
         TileController firstTile = GetTileController(first);
         TileController lastTile = GetTileController(last);
-        //Target actually has a floor
-        if(lastTile.cover.GetCover((byte)CoverSides.NEGY) != (byte)CoverType.FULL) {
-            return false;
-        }
         //Moving Left
         if (last.x < first.x) {
             if (firstTile.cover.negativeX == (byte)CoverType.FULL) {

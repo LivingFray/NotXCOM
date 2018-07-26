@@ -37,6 +37,10 @@ public class EntityController : MonoBehaviour {
     }
 
     public void FollowPath(Vector3Int[] path) {
+        if(path == null) {
+            Debug.LogWarning("No path to follow");
+            return;
+        }
         StartCoroutine(Path_Coroutine(path));
     }
 
