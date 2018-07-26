@@ -231,17 +231,20 @@ public class GameController : MonoBehaviour {
 
         //Get maximum distance jumpable
         int maxJump = 0;
-        Vector3Int upCell = cell;
-        while(maxJump < maxClimbHeight) {
-            upCell = upCell + new Vector3Int(0, 1, 0);
-            //Check for air space above
-            if(CanTraverseVertical(cell, upCell)) {
-                maxJump++;
-            } else {
-                break;
+        {
+            Vector3Int upCell = cell;
+            Vector3Int lastCell = cell;
+            while (maxJump < maxClimbHeight) {
+                upCell = upCell + new Vector3Int(0, 1, 0);
+                //Check for air space above
+                if (CanTraverseVertical(lastCell, upCell)) {
+                    maxJump++;
+                } else {
+                    break;
+                }
+                lastCell = upCell;
             }
         }
-
         List<Vector3Int> neighbours = new List<Vector3Int>();
 
         Vector3Int[] offsets = new Vector3Int[4];
@@ -251,16 +254,43 @@ public class GameController : MonoBehaviour {
         offsets[3] = new Vector3Int(0, 0, 1);
 
         foreach (Vector3Int offset in offsets) {
+            Vector3Int offCell = offset + cell;
+            //Skip the cell if it is outside the map
+            if(OutOfBounds(offCell)) {
+                continue;
+            }
             //Check all cells that can be jumped to aswell as walked to
             for (int i = 0; i <= maxJump; i++) {
-                Vector3Int n = cell + offset + new Vector3Int(0, i, 0);
+                Vector3Int n = offCell + new Vector3Int(0, i, 0);
                 //Skip cells that aren't in the playing field
-                if (OutOfBounds(n)) {
+                if (n.y >= height) {
                     continue;
                 }
                 //If horizontal movement is fine, add it
                 if (CanTraverse(cell + new Vector3Int(0, i, 0), n)) {
                     neighbours.Add(n);
+                }
+            }
+
+            //Iterate down until OOB, at max fall distance, hit a roof, or hit a floor
+            Vector3Int currentCell = offCell;
+            //Only check a fixed distance down
+            for(int i = 0; i < maxFallHeight; i++) {
+                //Floor of current cell to land on found
+                if (GetTileController(currentCell).cover.GetCover((byte)CoverSides.NEGY) == (byte)CoverType.FULL) {
+                    neighbours.Add(currentCell);
+                    break;
+                }
+                //Haven't landed, lets see if we can go down further
+                //Drop down a cell
+                currentCell += new Vector3Int(0, -1, 0);
+                //Fell out of the map
+                if (currentCell.y < 0) {
+                    break;
+                }
+                //Ceiling of new cell blocks the fall
+                if (GetTileController(currentCell).cover.GetCover((byte)CoverSides.POSY) == (byte)CoverType.FULL) {
+                    break;
                 }
             }
         }
@@ -270,7 +300,7 @@ public class GameController : MonoBehaviour {
 
     bool CanTraverseVertical(Vector3Int first, Vector3Int last) {
         //Check we are still in the map
-        if(first.y < 0 || first.y >= height || last.y < 0 || last.y >= height) {
+        if(OutOfBounds(first) || OutOfBounds(last)) {
             return false;
         }
         //Ensure first is lower than last
