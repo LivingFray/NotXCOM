@@ -32,7 +32,8 @@ public class GameController : MonoBehaviour {
 
     public bool clearLOS = true;
 
-    public float maxTraversableCover = 0.5f;
+    public int maxClimbHeight = 2;
+    public int maxFallHeight = 4;
 
     public bool HasLineOfSightDDA(Vector3Int start, Vector3Int end, out byte cover) {
         //Iterate from start position to end position, checking for blocking cover
@@ -223,7 +224,24 @@ public class GameController : MonoBehaviour {
          * Are at most MaxClimb tiles away up
          * Are at most MaxFall tiles away down
          * Have no full cover between the start cell and neighbour
+         * 
+         * Vertical Movement is done in current cell when jumping
+         * and neighbouring cell when falling
          */
+
+        //Get maximum distance jumpable
+        int maxJump = 0;
+        Vector3Int upCell = cell;
+        while(maxJump < maxClimbHeight) {
+            upCell = cell + new Vector3Int(0, 1, 0);
+            //Check for air space above
+            if(CanTraverseVertical(cell, upCell)) {
+                maxJump++;
+            } else {
+                break;
+            }
+        }
+
         List<Vector3Int> neighbours = new List<Vector3Int>();
 
         Vector3Int[] offsets = new Vector3Int[4];
@@ -232,20 +250,44 @@ public class GameController : MonoBehaviour {
         offsets[2] = new Vector3Int(0, 0, -1);
         offsets[3] = new Vector3Int(0, 0, 1);
 
-        //For each cardinal direction check above then below
         foreach (Vector3Int offset in offsets) {
-            Vector3Int n = cell + offset;
-            //Skip cells that aren't in the playing field
-            if(OutOfBounds(n)) {
-                continue;
-            }
-            //If horizontal movement is fine, add it
-            if(CanTraverse(cell, n)) {
-                neighbours.Add(n);
+            //Check all cells that can be jumped to aswell as walked to
+            for (int i = 0; i <= maxJump; i++) {
+                Vector3Int n = cell + offset + new Vector3Int(0, i, 0);
+                //Skip cells that aren't in the playing field
+                if (OutOfBounds(n)) {
+                    continue;
+                }
+                //If horizontal movement is fine, add it
+                if (CanTraverse(cell + new Vector3Int(0, i, 0), n)) {
+                    neighbours.Add(n);
+                }
             }
         }
 
         return neighbours;
+    }
+
+    bool CanTraverseVertical(Vector3Int first, Vector3Int last) {
+        //Check we are still in the map
+        if(first.y < 0 || first.y >= height || last.y < 0 || last.y >= height) {
+            return false;
+        }
+        //Ensure first is lower than last
+        if(first.y > last.y) {
+            Vector3Int temp = first;
+            first = last;
+            last = temp;
+        }
+        //Check first tile's ceiling
+        if(GetTileController(first).cover.GetCover((byte)CoverSides.POSY) == (byte)CoverType.FULL) {
+            return false;
+        }
+        //Check last tile's floor
+        if (GetTileController(last).cover.GetCover((byte)CoverSides.NEGY) == (byte)CoverType.FULL) {
+            return false;
+        }
+        return true;
     }
 
     //Returns whether a queried cell is not within the grid 
@@ -257,6 +299,10 @@ public class GameController : MonoBehaviour {
     bool CanTraverse(Vector3Int first, Vector3Int last) {
         TileController firstTile = GetTileController(first);
         TileController lastTile = GetTileController(last);
+        //Target actually has a floor
+        if(lastTile.cover.GetCover((byte)CoverSides.NEGY) != (byte)CoverType.FULL) {
+            return false;
+        }
         //Moving Left
         if (last.x < first.x) {
             if (firstTile.cover.negativeX == (byte)CoverType.FULL) {
