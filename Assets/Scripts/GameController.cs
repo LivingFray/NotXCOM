@@ -68,37 +68,6 @@ public class GameController : MonoBehaviour {
         cover = (byte)CoverType.NONE;
 
         Vector3Int oldGrid = new Vector3Int();
-        /*
-         if(dda.maxX < dda.maxY) {
-			if(dda.maxX < dda.maxZ) {
-				dda.gridX = dda.gridX + dda.stepX;
-				if(dda.gridX == numX || dda.gridX == -1)
-					return false; 
-				dda.maxX = dda.maxX + dda.deltaX;
-				dda.distToEdge += dda.deltaX;
-			} else  {
-				dda.gridZ = dda.gridZ + dda.stepZ;
-				if(dda.gridZ == numZ || dda.gridZ == -1)
-					return false;
-				dda.maxZ = dda.maxZ + dda.deltaZ;
-				dda.distToEdge += dda.deltaZ;
-			}
-		} else  {
-			if(dda.maxY < dda.maxZ) {
-				dda.gridY = dda.gridY + dda.stepY;
-				if(dda.gridY == numY || dda.gridY == -1)
-					return false;
-				dda.maxY = dda.maxY + dda.deltaY;
-				dda.distToEdge += dda.deltaY;
-			} else  {
-				dda.gridZ = dda.gridZ + dda.stepZ;
-				if(dda.gridZ == numZ || dda.gridZ == -1)
-					return false;
-				dda.maxZ = dda.maxZ + dda.deltaZ;
-				dda.distToEdge += dda.deltaZ;
-			}
-		}
-         */
         while (stillSearching) {
             oldGrid = grid;
             //Which face of the tile was passed through
@@ -183,22 +152,21 @@ public class GameController : MonoBehaviour {
         return Math.Max(tCon1.cover.GetCover(f1), tCon2.cover.GetCover(f2));
     }
 
-    /*
-    public Vector2Int[] FindPath(Vector2Int start, Vector2Int end) {
+    public Vector3Int[] FindPath(Vector3Int start, Vector3Int end) {
         //Track visited nodes
-        List<Vector2Int> closed = new List<Vector2Int>();
+        List<Vector3Int> closed = new List<Vector3Int>();
         //Track potential nodes
-        PriorityQueue<Vector2Int> open = new PriorityQueue<Vector2Int>();
+        PriorityQueue<Vector3Int> open = new PriorityQueue<Vector3Int>();
         open.Enqueue(start, 0.0f);
         //Track best previous step
-        Dictionary<Vector2Int, Vector2Int> cameFrom = new Dictionary<Vector2Int, Vector2Int>();
+        Dictionary<Vector3Int, Vector3Int> cameFrom = new Dictionary<Vector3Int, Vector3Int>();
         //Track g-scores for visiting each node
-        Dictionary<Vector2Int, float> gScore = new Dictionary<Vector2Int, float>();
+        Dictionary<Vector3Int, float> gScore = new Dictionary<Vector3Int, float>();
         //Set cost of first node to 0
         gScore[start] = 0.0f;
         while (open.Count > 0) {
             //Get node with lowest cost
-            Vector2Int current = open.Dequeue();
+            Vector3Int current = open.Dequeue();
             //If goal construct path
             if (current == end) {
                 return ConstructPath(cameFrom, current);
@@ -216,10 +184,11 @@ public class GameController : MonoBehaviour {
                     if (x != 0 && z != 0) {
                         continue;
                     }
-
-                    Vector2Int neighbour = current + new Vector2Int(x, z);
+                    //TODO: Change path finding to allow rising and falling
+                    int y = 0;
+                    Vector3Int neighbour = current + new Vector3Int(x, y, z);
                     //Skip out of bounds cells
-                    if (neighbour.x < 0 || neighbour.y < 0 || neighbour.x >= width || neighbour.y >= height) {
+                    if (neighbour.x < 0 || neighbour.y < 0 || neighbour.z < 0 || neighbour.x >= width || neighbour.y >= height || neighbour.z >= depth) {
                         continue;
                     }
 
@@ -251,9 +220,10 @@ public class GameController : MonoBehaviour {
         return null;
     }
 
-    Vector2Int[] ConstructPath(Dictionary<Vector2Int, Vector2Int> cameFrom, Vector2Int current) {
+    //Extracts the shortest path from the distances calculated by A*
+    Vector3Int[] ConstructPath(Dictionary<Vector3Int, Vector3Int> cameFrom, Vector3Int current) {
         //Add current to path
-        List<Vector2Int> path = new List<Vector2Int> {
+        List<Vector3Int> path = new List<Vector3Int> {
             current
         };
         //While current exists in camefrom
@@ -266,62 +236,73 @@ public class GameController : MonoBehaviour {
         return path.ToArray();
     }
 
+    //Returns a list of every cell that can be reached in one step 
+    List<Vector3Int> GetNeighbours(Vector3Int cell) {
+        /*
+         * Valid neighbour cells:
+         * Have a floor tile (NegY)
+         * Are 1 tile away (no diagonals) horizontally
+         * Are at most MaxClimb tiles away up
+         * Are at most MaxFall tiles away down
+         * Have no full cover between the start cell and neighbour
+         */
+        List<Vector3Int> neighbours = new List<Vector3Int>();
+
+
+        return neighbours;
+    }
+
+    //Tests if a unit can move from one tile to the other
     bool CanTraverse(Vector3Int first, Vector3Int last) {
-        if (first.x != last.x && first.y != last.y) {
+        if (first.x != last.x && first.y != last.y && first.z != last.z) {
             //These tiles aren't neighbours!
             return false;
         }
-        if (first.x == last.x && first.y == last.y) {
+        if (first.x == last.x && first.y == last.y && first.z == last.z) {
             //Why would you want to check if a tile can reach itself?
             return true;
         }
-        GameObject firstObj = GetTile(first);
-        GameObject lastObj = GetTile(last);
-        //Check objects both exist
-        if (!firstObj || !lastObj) {
-            return false;
-        }
-        TileController firstTile = firstObj.GetComponent<TileController>();
-        TileController lastTile = lastObj.GetComponent<TileController>();
+        TileController firstTile = GetTileController(first);
+        TileController lastTile = GetTileController(last);
         //Moving Left
         if (last.x < first.x) {
-            if (firstTile.cover.negativeX > maxTraversableCover) {
+            if (firstTile.cover.negativeX == (byte)CoverType.FULL) {
                 return false;
             }
-            if (lastTile.cover.positiveX > maxTraversableCover) {
+            if (lastTile.cover.positiveX == (byte)CoverType.FULL) {
                 return false;
             }
         }
         //Moving Right
         if (last.x > first.x) {
-            if (firstTile.cover.positiveX > maxTraversableCover) {
+            if (firstTile.cover.positiveX == (byte)CoverType.FULL) {
                 return false;
             }
-            if (lastTile.cover.negativeX > maxTraversableCover) {
+            if (lastTile.cover.negativeX == (byte)CoverType.FULL) {
                 return false;
             }
         }
         //Moving Down
         if (last.y < first.y) {
-            if (firstTile.cover.negativeZ > maxTraversableCover) {
+            if (firstTile.cover.negativeZ == (byte)CoverType.FULL) {
                 return false;
             }
-            if (lastTile.cover.positiveZ > maxTraversableCover) {
+            if (lastTile.cover.positiveZ == (byte)CoverType.FULL) {
                 return false;
             }
         }
         //Moving Up
         if (last.y > first.y) {
-            if (firstTile.cover.positiveZ > maxTraversableCover) {
+            if (firstTile.cover.positiveZ == (byte)CoverType.FULL) {
                 return false;
             }
-            if (lastTile.cover.negativeZ > maxTraversableCover) {
+            if (lastTile.cover.negativeZ == (byte)CoverType.FULL) {
                 return false;
             }
         }
         return true;
     }
-    */
+
     void UpdateEdges(Vector3Int pos, int edge) {
         string edgeName;
         switch (edge) {
@@ -374,6 +355,15 @@ public class GameController : MonoBehaviour {
         GenerateTestBoard();
     }
 
+    void SetTileObject(GameObject tile) {
+        tile.transform.Find("NegX").gameObject.SetActive(false);
+        tile.transform.Find("PosX").gameObject.SetActive(false);
+        tile.transform.Find("NegY").gameObject.SetActive(false);
+        tile.transform.Find("PosY").gameObject.SetActive(false);
+        tile.transform.Find("NegZ").gameObject.SetActive(false);
+        tile.transform.Find("PosZ").gameObject.SetActive(false);
+    }
+
     //Creates a board with tiles on for testing
     void GenerateTestBoard() {
         //Ground floor
@@ -383,30 +373,24 @@ public class GameController : MonoBehaviour {
                 if (tc.Tile == null) {
                     GameObject newTile = Instantiate(tile, tc.gridPos, Quaternion.identity, gameObject.transform);
                     tc.Tile = newTile;
+                    SetTileObject(newTile);
                 }
                 tc.cover.SetCover((byte)CoverSides.NEGY, (byte)CoverType.FULL);
-                tc.Tile.transform.Find("NegX").gameObject.SetActive(false);
-                tc.Tile.transform.Find("PosX").gameObject.SetActive(false);
-                tc.Tile.transform.Find("NegZ").gameObject.SetActive(false);
-                tc.Tile.transform.Find("PosZ").gameObject.SetActive(false);
-                tc.Tile.transform.Find("PosY").gameObject.SetActive(false);
+                tc.Tile.transform.Find("NegY").gameObject.SetActive(true);
             }
         }
         //Small wall section
         for (int z = 10; z < width; z++) {
-            int y = 1;
+            int y = 0;
             int x = 10;
             TileController tc = heightmap[x, y, z];
             if (tc.Tile == null) {
                 GameObject newTile = Instantiate(tile, tc.gridPos, Quaternion.identity, gameObject.transform);
                 tc.Tile = newTile;
+                SetTileObject(newTile);
             }
             tc.cover.SetCover((byte)CoverSides.NEGX, (byte)CoverType.FULL);
-            tc.Tile.transform.Find("PosY").gameObject.SetActive(false);
-            tc.Tile.transform.Find("PosX").gameObject.SetActive(false);
-            tc.Tile.transform.Find("NegZ").gameObject.SetActive(false);
-            tc.Tile.transform.Find("PosZ").gameObject.SetActive(false);
-            tc.Tile.transform.Find("NegY").gameObject.SetActive(false);
+            tc.Tile.transform.Find("NegX").gameObject.SetActive(true);
         }
         //Small raised area
         for (int x = 10; x < width-5; x++) {
@@ -415,13 +399,10 @@ public class GameController : MonoBehaviour {
                 if (tc.Tile == null) {
                     GameObject newTile = Instantiate(tile, tc.gridPos, Quaternion.identity, gameObject.transform);
                     tc.Tile = newTile;
+                    SetTileObject(newTile);
                 }
                 tc.cover.SetCover((byte)CoverSides.NEGY, (byte)CoverType.FULL);
-                tc.Tile.transform.Find("NegX").gameObject.SetActive(false);
-                tc.Tile.transform.Find("PosX").gameObject.SetActive(false);
-                tc.Tile.transform.Find("NegZ").gameObject.SetActive(false);
-                tc.Tile.transform.Find("PosZ").gameObject.SetActive(false);
-                tc.Tile.transform.Find("PosY").gameObject.SetActive(false);
+                tc.Tile.transform.Find("NegY").gameObject.SetActive(true);
             }
         }
     }
@@ -503,23 +484,23 @@ public class GameController : MonoBehaviour {
             tileEnd = GetTile(tile);
             SetMaterials(tileEnd, endMaterial);
         }
-        byte cover;
-        bool los = HasLineOfSightDDA(rayStart, rayEnd, out cover);
-        Debug.Log(los ? "LOS " + cover : "No LOS");
-        //Disabled pathfinding until it has been updated to function in 3D
-        /*
+        //byte cover;
+        //bool los = HasLineOfSightDDA(rayStart, rayEnd, out cover);
+        //Debug.Log(los ? "LOS " + cover : "No LOS");
+        //*
         Vector3Int[] route = FindPath(rayStart, rayEnd);
         if (route != null) {
             foreach (Vector3Int pos in route) {
                 if (pos != rayStart && pos != rayEnd) {
                     GameObject t = GetTile(pos);
                     if (t) {
-                        t.GetComponent<Renderer>().material = checkingMaterial;
+                        SetMaterials(t, checkingMaterial);
+                       // t.GetComponent<Renderer>().material = checkingMaterial;
                     }
                 }
             }
         }
-        */
+        //*/
     }
 
     //Gets the TileController for a specified tile (returns null if out of bounds)
