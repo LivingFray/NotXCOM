@@ -233,7 +233,7 @@ public class GameController : MonoBehaviour {
         int maxJump = 0;
         Vector3Int upCell = cell;
         while(maxJump < maxClimbHeight) {
-            upCell = cell + new Vector3Int(0, 1, 0);
+            upCell = upCell + new Vector3Int(0, 1, 0);
             //Check for air space above
             if(CanTraverseVertical(cell, upCell)) {
                 maxJump++;
