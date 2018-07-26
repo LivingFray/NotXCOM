@@ -35,6 +35,8 @@ public class GameController : MonoBehaviour {
     public int maxClimbHeight = 2;
     public int maxFallHeight = 4;
 
+    public GameObject testEntity;
+
     public bool HasLineOfSightDDA(Vector3Int start, Vector3Int end, out byte cover) {
         //Iterate from start position to end position, checking for blocking cover
         //TODO: Allow for stepping out
@@ -212,7 +214,12 @@ public class GameController : MonoBehaviour {
             //Add current to path
             path.Add(current);
         }
-        return path.ToArray();
+        Vector3Int[] retArray = new Vector3Int[path.Count];
+        //Path is from end to start, so reverse it
+        for(int i = 0; i < path.Count; i++) {
+            retArray[i] = path[path.Count - i - 1];
+        }
+        return retArray;
     }
 
     //Returns a list of every cell that can be reached in one step 
@@ -556,7 +563,7 @@ public class GameController : MonoBehaviour {
         //byte cover;
         //bool los = HasLineOfSightDDA(rayStart, rayEnd, out cover);
         //Debug.Log(los ? "LOS " + cover : "No LOS");
-        //*
+        /*
         Vector3Int[] route = FindPath(rayStart, rayEnd);
         if (route != null) {
             foreach (Vector3Int pos in route) {
@@ -570,6 +577,11 @@ public class GameController : MonoBehaviour {
             }
         }
         //*/
+        var eCon = testEntity.GetComponent<EntityController>();
+        eCon.SetPosition(rayStart);
+        if (!placingStart) {
+            eCon.FollowPath(FindPath(rayStart, rayEnd));
+        }
     }
 
     //Gets the TileController for a specified tile (returns null if out of bounds)
