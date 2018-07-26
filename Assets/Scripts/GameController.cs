@@ -144,7 +144,7 @@ public class GameController : MonoBehaviour {
     byte GetCoverValue(Vector3Int t1, Vector3Int t2, byte f1, byte f2) {
         //Get the tile controllers for both tiles to check
         TileController tCon1 = GetTileController(t1), tCon2 = GetTileController(t2);
-        if(tCon1 == null || tCon2 == null) {
+        if (tCon1 == null || tCon2 == null) {
             Debug.LogWarning("Missing tile controller!");
             return 0;
         }
@@ -174,47 +174,25 @@ public class GameController : MonoBehaviour {
             //Remove current node and add to closed
             closed.Add(current);
             //For every neighbouring node
-            for (int x = -1; x <= 1; x++) {
-                for (int z = -1; z <= 1; z++) {
-                    //A node is not a neighbour of itself
-                    if (x == 0 && z == 0) {
-                        continue;
-                    }
-                    //No diagonals
-                    if (x != 0 && z != 0) {
-                        continue;
-                    }
-                    //TODO: Change path finding to allow rising and falling
-                    int y = 0;
-                    Vector3Int neighbour = current + new Vector3Int(x, y, z);
-                    //Skip out of bounds cells
-                    if (neighbour.x < 0 || neighbour.y < 0 || neighbour.z < 0 || neighbour.x >= width || neighbour.y >= height || neighbour.z >= depth) {
-                        continue;
-                    }
-
-                    //Check for walls blocking path
-                    if (!CanTraverse(current, neighbour)) {
-                        continue;
-                    }
-
-                    //If neighbour is closed, skip
-                    if (closed.Contains(neighbour)) {
-                        continue;
-                    }
-                    //Calculate distance from start to neighbour
-                    float tentG = gScore[current] + 1.0f;
-                    //Add neighbour to open if not in already
-                    if (!open.Contains(neighbour)) {
-                        open.Enqueue(neighbour, tentG + (neighbour - end).sqrMagnitude);
-                    } else if (gScore.ContainsKey(neighbour) && tentG >= gScore[neighbour]) {
-                        //Otherwise if score is greater than current, skip
-                        continue;
-                    }
-                    //Update neighbour's camefrom to this node
-                    cameFrom[neighbour] = current;
-                    //Set neighbours g-score to new calculated
-                    gScore[neighbour] = tentG;
+            List<Vector3Int> neighbours = GetNeighbours(current);
+            foreach (Vector3Int neighbour in neighbours) {
+                //If neighbour is closed, skip
+                if (closed.Contains(neighbour)) {
+                    continue;
                 }
+                //Calculate distance from start to neighbour
+                float tentG = gScore[current] + 1.0f;
+                //Add neighbour to open if not in already
+                if (!open.Contains(neighbour)) {
+                    open.Enqueue(neighbour, tentG + (neighbour - end).sqrMagnitude);
+                } else if (gScore.ContainsKey(neighbour) && tentG >= gScore[neighbour]) {
+                    //Otherwise if score is greater than current, skip
+                    continue;
+                }
+                //Update neighbour's camefrom to this node
+                cameFrom[neighbour] = current;
+                //Set neighbours g-score to new calculated
+                gScore[neighbour] = tentG;
             }
         }
         return null;
@@ -248,20 +226,35 @@ public class GameController : MonoBehaviour {
          */
         List<Vector3Int> neighbours = new List<Vector3Int>();
 
+        Vector3Int[] offsets = new Vector3Int[4];
+        offsets[0] = new Vector3Int(-1, 0, 0);
+        offsets[1] = new Vector3Int(1, 0, 0);
+        offsets[2] = new Vector3Int(0, 0, -1);
+        offsets[3] = new Vector3Int(0, 0, 1);
+
+        //For each cardinal direction check above then below
+        foreach (Vector3Int offset in offsets) {
+            Vector3Int n = cell + offset;
+            //Skip cells that aren't in the playing field
+            if(OutOfBounds(n)) {
+                continue;
+            }
+            //If horizontal movement is fine, add it
+            if(CanTraverse(cell, n)) {
+                neighbours.Add(n);
+            }
+        }
 
         return neighbours;
     }
 
+    //Returns whether a queried cell is not within the grid 
+    bool OutOfBounds(Vector3Int cell) {
+        return cell.x < 0 || cell.y < 0 || cell.z < 0 || cell.x >= width || cell.y >= height || cell.z >= depth;
+    }
+
     //Tests if a unit can move from one tile to the other
     bool CanTraverse(Vector3Int first, Vector3Int last) {
-        if (first.x != last.x && first.y != last.y && first.z != last.z) {
-            //These tiles aren't neighbours!
-            return false;
-        }
-        if (first.x == last.x && first.y == last.y && first.z == last.z) {
-            //Why would you want to check if a tile can reach itself?
-            return true;
-        }
         TileController firstTile = GetTileController(first);
         TileController lastTile = GetTileController(last);
         //Moving Left
@@ -282,8 +275,8 @@ public class GameController : MonoBehaviour {
                 return false;
             }
         }
-        //Moving Down
-        if (last.y < first.y) {
+        //Moving Backwards
+        if (last.z < first.z) {
             if (firstTile.cover.negativeZ == (byte)CoverType.FULL) {
                 return false;
             }
@@ -291,8 +284,8 @@ public class GameController : MonoBehaviour {
                 return false;
             }
         }
-        //Moving Up
-        if (last.y > first.y) {
+        //Moving Forwards
+        if (last.z > first.z) {
             if (firstTile.cover.positiveZ == (byte)CoverType.FULL) {
                 return false;
             }
@@ -393,8 +386,8 @@ public class GameController : MonoBehaviour {
             tc.Tile.transform.Find("NegX").gameObject.SetActive(true);
         }
         //Small raised area
-        for (int x = 10; x < width-5; x++) {
-            for (int z = 0; z < depth-10; z++) {
+        for (int x = 10; x < width - 5; x++) {
+            for (int z = 0; z < depth - 10; z++) {
                 TileController tc = heightmap[x, 2, z];
                 if (tc.Tile == null) {
                     GameObject newTile = Instantiate(tile, tc.gridPos, Quaternion.identity, gameObject.transform);
@@ -495,7 +488,7 @@ public class GameController : MonoBehaviour {
                     GameObject t = GetTile(pos);
                     if (t) {
                         SetMaterials(t, checkingMaterial);
-                       // t.GetComponent<Renderer>().material = checkingMaterial;
+                        // t.GetComponent<Renderer>().material = checkingMaterial;
                     }
                 }
             }
