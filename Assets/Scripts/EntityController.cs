@@ -13,19 +13,18 @@ public class EntityController : MonoBehaviour {
 
     public int movementPoints = 12;
 
-    Vector3Int gridPos;
+    public Vector3Int GridPos { get; private set; }
 
     public void SetPosition(Vector3Int position) {
-        gridPos = position;
+        GridPos = position;
         transform.position = position;
     }
 
     public void MoveTo(Vector3Int target) {
-        gridPos = target;
         StartCoroutine(Move_Coroutine(target));
     }
 
-    IEnumerator Move_Coroutine(Vector3 target) {
+    IEnumerator Move_Coroutine(Vector3Int target) {
         float dist = (target - transform.position).magnitude;
         float d = 0;
         Vector3 start = transform.position;
@@ -34,6 +33,7 @@ public class EntityController : MonoBehaviour {
             transform.position = Vector3.Lerp(start, target, d / dist);
             yield return null;
         }
+        GridPos = target;
     }
 
     public void FollowPath(Vector3Int[] path) {
@@ -48,5 +48,13 @@ public class EntityController : MonoBehaviour {
         for (int i = 0; i < path.Length; i++) {
             yield return Move_Coroutine(path[i]);
         }
+    }
+
+    private void Awake() {
+        GridPos = new Vector3Int((int)transform.position.x, (int)transform.position.y, (int)transform.position.z);
+    }
+
+    private void OnMouseDown() {
+        team.EntityClicked(this);
     }
 }

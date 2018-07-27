@@ -20,12 +20,6 @@ public class GameController : MonoBehaviour {
 
     public Material checkingMaterial;
 
-    private Vector3Int rayStart;
-    private GameObject tileStart;
-
-    private Vector3Int rayEnd;
-    private GameObject tileEnd;
-
     private bool placingStart = true;
 
     public GameObject line;
@@ -35,7 +29,13 @@ public class GameController : MonoBehaviour {
     public int maxClimbHeight = 2;
     public int maxFallHeight = 4;
 
-    public GameObject testEntity;
+    //TODO: Make private?
+    public List<GameObject> entities;
+    public Team[] teams;
+
+    public GameObject entityPrefab;
+
+    private int currentTeam = 0;
 
     public bool HasLineOfSightDDA(Vector3Int start, Vector3Int end, out byte cover) {
         //Iterate from start position to end position, checking for blocking cover
@@ -291,7 +291,6 @@ public class GameController : MonoBehaviour {
                 //Add cell if floor of current cell exists
                 if (GetTileController(currentCell).cover.GetCover((byte)CoverSides.NEGY) == (byte)CoverType.FULL) {
                     //Don't add the tile if the height is unchanged
-                    Debug.Log(currentCell.y + " " + rayStart.y);
                     if (i != 0) {
                         neighbours.Add(currentCell);
                     }
@@ -425,6 +424,7 @@ public class GameController : MonoBehaviour {
 
     // Use this for initialization
     void Start() {
+        //Initialise map
         heightmap = new TileController[width, height, depth];
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -436,7 +436,41 @@ public class GameController : MonoBehaviour {
                 }
             }
         }
+        //Create map
         GenerateTestBoard();
+        //Create teams
+        AddTeams();
+        //Add entities
+        foreach (Team t in teams) {
+            t.PopulateEntities();
+        }
+        //Start game
+    }
+
+    void SetTurn(int n) {
+        teams[currentTeam].OnTurnEnd();
+        teams[n].OnTurnStart();
+    }
+
+    void AddTeams() {
+        teams = new Team[2];
+        //Human team
+        teams[0] = new HumanTeam {
+            Controller = this,
+            entityPrefab = entityPrefab
+        };
+        //"""AI""" team (human for now, AI is hard)
+        teams[1] = new HumanTeam {
+            Controller = this,
+            entityPrefab = entityPrefab
+        };
+        var spawnList = ((HumanTeam)teams[1]).spawnPositions;
+        for (int i = 0; i < spawnList.Length; i++) {
+            spawnList[i].x += 4;
+        }
+        //Set turn to player 1's (or player 0 if you use index position I guess)
+        currentTeam = 0;
+        teams[0].OnTurnStart();
     }
 
     void SetTileObject(GameObject tile) {
@@ -491,105 +525,15 @@ public class GameController : MonoBehaviour {
         }
     }
 
-    private void ClearLOS() {
-        //If clearing has been disabled for some reason, stop
-        if (!clearLOS) {
-            return;
-        }
-        //Iterate over each tile and reset material properties
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                for (int z = 0; z < depth; z++) {
-                    Vector3Int pos = new Vector3Int(x, y, z);
-                    //Don't reset marker tiles (begininng and end of path)
-                    if (pos == rayStart || pos == rayEnd) {
-                        continue;
-                    }
-                    GameObject tileObj = GetTile(pos);
-                    //Skip any tiles that don't have a corresponding game object
-                    if (tileObj == null) {
-                        continue;
-                    }
-                    ResetMaterials(tileObj);
-                }
-            }
-        }
-    }
-
     private void Update() {
         //Toggle begin/end node placement
         if (Input.GetKeyDown(KeyCode.Space)) {
             placingStart = !placingStart;
         }
-        //Manually clear the board
-        if (Input.GetKeyDown(KeyCode.LeftShift)) {
-            bool prevClear = clearLOS;
-            clearLOS = true;
-            ClearLOS();
-            clearLOS = prevClear;
-        }
-    }
-
-    void SetMaterials(GameObject parent, Material mat) {
-        //Loop through and mess with materials
-        foreach (Renderer child in parent.GetComponentsInChildren<Renderer>()) {
-            child.material = mat;
-        }
-    }
-
-    void ResetMaterials(GameObject parent) {
-        //Loop through and mess with materials
-        foreach (Renderer child in parent.GetComponentsInChildren<Renderer>()) {
-            //Floor/Ceiling tiles are lighter to add contrast
-            if (child.gameObject.name.Contains("Y")) {
-                child.material = baseMaterial;
-            } else {
-                child.material = darkMaterial;
-            }
-        }
     }
 
     public void TileClicked(Vector3Int tile) {
-        //Wipe the board
-        ClearLOS();
-        //Place correct node
-        if (placingStart) {
-            if (tileStart) {
-                ResetMaterials(tileStart);
-            }
-            rayStart = tile;
-            tileStart = GetTile(tile);
-            SetMaterials(tileStart, startMaterial);
-        } else {
-            if (tileEnd) {
-                ResetMaterials(tileEnd);
-            }
-            rayEnd = tile;
-            tileEnd = GetTile(tile);
-            SetMaterials(tileEnd, endMaterial);
-        }
-        //byte cover;
-        //bool los = HasLineOfSightDDA(rayStart, rayEnd, out cover);
-        //Debug.Log(los ? "LOS " + cover : "No LOS");
-        /*
-        Vector3Int[] route = FindPath(rayStart, rayEnd);
-        if (route != null) {
-            foreach (Vector3Int pos in route) {
-                if (pos != rayStart && pos != rayEnd) {
-                    GameObject t = GetTile(pos);
-                    if (t) {
-                        SetMaterials(t, checkingMaterial);
-                        // t.GetComponent<Renderer>().material = checkingMaterial;
-                    }
-                }
-            }
-        }
-        //*/
-        var eCon = testEntity.GetComponent<EntityController>();
-        eCon.SetPosition(rayStart);
-        if (!placingStart) {
-            eCon.FollowPath(FindPath(rayStart, rayEnd));
-        }
+        teams[currentTeam].TileClicked(GetTileController(tile));
     }
 
     //Gets the TileController for a specified tile (returns null if out of bounds)
