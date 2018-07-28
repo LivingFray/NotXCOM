@@ -447,9 +447,10 @@ public class GameController : MonoBehaviour {
         //Start game
     }
 
-    void SetTurn(int n) {
+    public void NextTurn() {
         teams[currentTeam].OnTurnEnd();
-        teams[n].OnTurnStart();
+        currentTeam = (currentTeam + 1) % teams.Length;
+        teams[currentTeam].OnTurnStart();
     }
 
     void AddTeams() {
@@ -530,6 +531,7 @@ public class GameController : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.Space)) {
             placingStart = !placingStart;
         }
+        teams[currentTeam].Update();
     }
 
     public void TileClicked(Vector3Int tile) {

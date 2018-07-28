@@ -48,4 +48,10 @@ public class HumanTeam : Team {
     public override void OnTurnEnd() {
         currentEntity = null;
     }
+
+    public override void Update() {
+        if(Input.GetKeyDown(KeyCode.End)) {
+            Controller.NextTurn();
+        }
+    }
 }

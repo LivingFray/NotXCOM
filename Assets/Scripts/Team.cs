@@ -22,4 +22,7 @@ public abstract class Team {
     //Adds the entities belonging to the team to the game
     public abstract void PopulateEntities();
 
+    //Called every frame
+    public abstract void Update();
+
 }
