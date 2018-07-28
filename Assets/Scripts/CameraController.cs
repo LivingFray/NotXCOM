@@ -6,11 +6,19 @@ public class CameraController : MonoBehaviour {
 
     public float edgeSize = 0.05f;
 
-    public float cameraSpeed = 2.0f;
+    public float cameraSpeed = 4.0f;
+
+    public float zoom = 10.0f;
+
+    Vector3 lookingAt;
+
+    void UpdateCamera() {
+        transform.position = lookingAt - transform.forward * zoom;
+    }
 
 	// Use this for initialization
 	void Start () {
-		
+        lookingAt = new Vector3(0, 0, 0);
 	}
 	
 	// Update is called once per frame
@@ -19,22 +27,23 @@ public class CameraController : MonoBehaviour {
             transform.Rotate(new Vector3(0, 90, 0), Space.World);
         }
         if (Input.GetKeyDown(KeyCode.E)) {
-            transform.Rotate(new Vector3(0, 90, 0), Space.World);
+            transform.Rotate(new Vector3(0, -90, 0), Space.World);
         }
 
-        float normX = Input.mousePosition.x / Screen.width;
-        float normY = Input.mousePosition.y / Screen.height;
+        float borderSize = edgeSize * Screen.width;
 
-        if (normX < edgeSize) {
-            transform.localPosition -= transform.right * Time.deltaTime * cameraSpeed;
-        } else if (normX > 1.0 - edgeSize) {
-            transform.localPosition += transform.right * Time.deltaTime * cameraSpeed;
+        if (Input.GetKey(KeyCode.A) || Input.mousePosition.x < borderSize) {
+            lookingAt -= transform.right * Time.deltaTime * cameraSpeed;
+        } else if (Input.GetKey(KeyCode.D) || Input.mousePosition.x > Screen.width - borderSize) {
+            lookingAt += transform.right * Time.deltaTime * cameraSpeed;
         }
 
-        if (normY < edgeSize) {
-            transform.localPosition -= Vector3.Cross(transform.right, new Vector3(0, 1, 0)) * Time.deltaTime * cameraSpeed;
-        } else if (normY > 1.0 - edgeSize) {
-            transform.localPosition += Vector3.Cross(transform.right, new Vector3(0, 1, 0)) * Time.deltaTime * cameraSpeed;
+        if (Input.GetKey(KeyCode.S) || Input.mousePosition.y < borderSize) {
+            lookingAt -= Vector3.Cross(transform.right, new Vector3(0, 1, 0)) * Time.deltaTime * cameraSpeed;
+        } else if (Input.GetKey(KeyCode.W) || Input.mousePosition.y > Screen.height - borderSize) {
+            lookingAt += Vector3.Cross(transform.right, new Vector3(0, 1, 0)) * Time.deltaTime * cameraSpeed;
         }
+
+        UpdateCamera();
     }
 }

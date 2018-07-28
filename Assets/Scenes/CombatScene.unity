@@ -164,7 +164,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   edgeSize: 0.05
-  cameraSpeed: 2
+  cameraSpeed: 4
+  zoom: 10
 --- !u!1 &777276962 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2408333131009138359, guid: afeef610528769849ab2bbfa76a43a83,
