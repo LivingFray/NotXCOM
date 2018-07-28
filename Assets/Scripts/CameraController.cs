@@ -15,6 +15,13 @@ public class CameraController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        if(Input.GetKeyDown(KeyCode.Q)) {
+            transform.Rotate(new Vector3(0, 90, 0), Space.World);
+        }
+        if (Input.GetKeyDown(KeyCode.E)) {
+            transform.Rotate(new Vector3(0, 90, 0), Space.World);
+        }
+
         float normX = Input.mousePosition.x / Screen.width;
         float normY = Input.mousePosition.y / Screen.height;
 
