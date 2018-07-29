@@ -137,13 +137,11 @@ public class GameController : MonoBehaviour {
             UpdateEdges(grid, faceNext);
             //Break out if we hit the goal
             stillSearching = grid.x != end.x || grid.y != end.y || grid.z != end.z;
-            if (stillSearching) {
-                //Update cover value
-                cover = Math.Max(cover, GetCoverValue(oldGrid, grid, faceCurrent, faceNext));
-                //Check for cover
-                if (cover == (byte)CoverType.FULL) {
-                    return false;
-                }
+            //Update cover value
+            cover = Math.Max(cover, GetCoverValue(oldGrid, grid, faceCurrent, faceNext));
+            //Check for cover
+            if (cover == (byte)CoverType.FULL) {
+                return false;
             }
         }
         return true;
