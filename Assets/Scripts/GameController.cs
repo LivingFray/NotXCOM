@@ -38,6 +38,8 @@ public class GameController : MonoBehaviour {
 
     public GameObject turnText;
 
+    public GameObject entitySelect;
+
     private int currentTeam = 0;
 
     public bool HasLineOfSightDDA(Vector3Int start, Vector3Int end, out byte cover) {
@@ -448,6 +450,9 @@ public class GameController : MonoBehaviour {
             t.PopulateEntities();
         }
         //Start game
+
+        //Turn off entity select as nno entity is selected
+        entitySelect.SetActive(false);
     }
 
     public void NextTurn() {
@@ -561,5 +566,12 @@ public class GameController : MonoBehaviour {
             return null;
         }
         return tc.Tile;
+    }
+
+    public void EntityClicked(EntityController entity) {
+        if(entity.team == teams[currentTeam]) {
+            return;
+        }
+        teams[currentTeam].EnemyClicked(entity);
     }
 }

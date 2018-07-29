@@ -16,11 +16,13 @@ public class HumanTeam : Team {
     };
 
     public override void EntityClicked(EntityController entity) {
-        Debug.Log("Ent Click");
-        if (turnActive) {
+        if (turnActive && !entity.actionsSpent) {
             //Make entity visibly selected (update hud, actions, etc)
             currentEntity = entity;
+            Controller.entitySelect.transform.position = entity.GridPos;
+            Controller.entitySelect.SetActive(true);
         }
+        Controller.EntityClicked(entity);
     }
 
     public override void OnTurnStart() {
@@ -41,10 +43,13 @@ public class HumanTeam : Team {
     }
 
     public override void TileClicked(TileController tile) {
-        Debug.Log("Click");
         if (turnActive) {
             if (currentEntity != null) {
                 currentEntity.FollowPath(Controller.FindPath(currentEntity.GridPos, tile.gridPos));
+                if(currentEntity.actionsSpent) {
+                    currentEntity = null;
+                    Controller.entitySelect.SetActive(false);
+                }
                 CheckActionsLeft();
             }
         }
@@ -67,5 +72,9 @@ public class HumanTeam : Team {
             }
         }
         Controller.NextTurn();
+    }
+
+    public override void EnemyClicked(EntityController entity) {
+        Debug.Log("Enemy clicked");
     }
 }
