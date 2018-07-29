@@ -279,7 +279,7 @@ public class GameController : MonoBehaviour {
                     continue;
                 }
                 //If horizontal movement is fine, add it
-                if (IsWalkable(n) && CanTraverse(cell + new Vector3Int(0, i, 0), n)) {
+                if (IsWalkable(n) && CanTraverse(cell + new Vector3Int(0, i, 0), n) && !IsOccupied(n)) {
                     neighbours.Add(n);
                 }
             }
@@ -292,11 +292,11 @@ public class GameController : MonoBehaviour {
             //Iterate down until OOB, at max fall distance, hit a roof, or hit a floor
             Vector3Int currentCell = offCell;
             //Only check a fixed distance down
-            for (int i = 0; i < 50; i++) {
+            for (int i = 0; i <= maxFallHeight; i++) {
                 //Add cell if floor of current cell exists
                 if (GetTileController(currentCell).cover.GetCover((byte)CoverSides.NEGY) == (byte)CoverType.FULL) {
                     //Don't add the tile if the height is unchanged
-                    if (i != 0) {
+                    if (i != 0 && !IsOccupied(currentCell)) {
                         neighbours.Add(currentCell);
                     }
                     break;
@@ -315,6 +315,15 @@ public class GameController : MonoBehaviour {
         }
 
         return neighbours;
+    }
+
+    bool IsOccupied(Vector3Int tile) {
+        foreach (GameObject ent in entities) {
+            if(ent.GetComponent<EntityController>().GridPos == tile) {
+                return true;
+            }
+        }
+        return false;
     }
 
     bool IsWalkable(Vector3Int cell) {
