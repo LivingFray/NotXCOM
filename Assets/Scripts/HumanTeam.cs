@@ -16,10 +16,11 @@ public class HumanTeam : Team {
     };
 
     public override void EntityClicked(EntityController entity) {
-        if (turnActive && !entity.actionsSpent) {
+        if (turnActive && entity.actions > 0) {
             //Make entity visibly selected (update hud, actions, etc)
             currentEntity = entity;
-            Controller.entitySelect.transform.position = entity.GridPos;
+            Controller.entitySelect.transform.parent = currentEntity.transform;
+            Controller.entitySelect.transform.localPosition = new Vector3(0, 0, 0);
             Controller.entitySelect.SetActive(true);
         }
         Controller.EntityClicked(entity);
@@ -28,7 +29,7 @@ public class HumanTeam : Team {
     public override void OnTurnStart() {
         turnActive = true;
         foreach (EntityController ent in entities) {
-            ent.actionsSpent = false;
+            ent.actions = 2;
         }
         //Update UI stuff
     }
@@ -36,9 +37,11 @@ public class HumanTeam : Team {
     public override void PopulateEntities() {
         for (int i = 0; i < spawnPositions.Length; i++) {
             GameObject newEnt = Object.Instantiate(entityPrefab, spawnPositions[i], Quaternion.identity);
+            EntityController ent = newEnt.GetComponent<EntityController>();
             Controller.entities.Add(newEnt);
-            entities.Add(newEnt.GetComponent<EntityController>());
-            newEnt.GetComponent<EntityController>().team = this;
+            entities.Add(ent);
+            ent.team = this;
+            ent.controller = Controller;
         }
     }
 
@@ -46,7 +49,7 @@ public class HumanTeam : Team {
         if (turnActive) {
             if (currentEntity != null) {
                 currentEntity.FollowPath(Controller.FindPath(currentEntity.GridPos, tile.gridPos));
-                if(currentEntity.actionsSpent) {
+                if(currentEntity.actions == 0) {
                     currentEntity = null;
                     Controller.entitySelect.SetActive(false);
                 }
@@ -67,7 +70,7 @@ public class HumanTeam : Team {
 
     void CheckActionsLeft() {
         foreach (EntityController ent in entities) {
-            if(!ent.actionsSpent) {
+            if(ent.actions != 0) {
                 return;
             }
         }
@@ -75,6 +78,12 @@ public class HumanTeam : Team {
     }
 
     public override void EnemyClicked(EntityController entity) {
-        Debug.Log("Enemy clicked");
+        if(currentEntity != null) {
+            currentEntity.ShootEnemy(entity);
+            if (currentEntity.actions == 0) {
+                currentEntity = null;
+                Controller.entitySelect.SetActive(false);
+            }
+        }
     }
 }

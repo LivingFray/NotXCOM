@@ -13,7 +13,7 @@ public class EntityController : MonoBehaviour {
 
     public int movementPoints = 12;
 
-    public bool actionsSpent = false;
+    public byte actions = 2;
 
     public Vector3Int GridPos { get; private set; }
 
@@ -27,6 +27,7 @@ public class EntityController : MonoBehaviour {
     }
 
     IEnumerator Move_Coroutine(Vector3Int target) {
+        GridPos = target;
         float dist = (target - transform.position).magnitude;
         float d = 0;
         Vector3 start = transform.position;
@@ -35,7 +36,6 @@ public class EntityController : MonoBehaviour {
             transform.position = Vector3.Lerp(start, target, d / dist);
             yield return null;
         }
-        GridPos = target;
     }
 
     public void FollowPath(Vector3Int[] path) {
@@ -43,17 +43,29 @@ public class EntityController : MonoBehaviour {
             Debug.LogWarning("No path to follow");
             return;
         }
-        if(actionsSpent || path.Length > movementPoints) {
+        if(actions == 0 || path.Length > movementPoints) {
             return;
         }
         StartCoroutine(Path_Coroutine(path));
-        actionsSpent = true;
+        actions--;
     }
 
     IEnumerator Path_Coroutine(Vector3Int[] path) {
         for (int i = 0; i < path.Length; i++) {
             yield return Move_Coroutine(path[i]);
         }
+    }
+
+    public void ShootEnemy(EntityController enemy) {
+        byte cover;
+        bool los = controller.HasLineOfSightDDA(GridPos, enemy.GridPos, out cover);
+        if (los) {
+            Debug.Log("Took shot at enemy " + cover);
+            //Pretty fire animations and such
+        } else {
+            Debug.Log("Shot blocked");
+        }
+        actions--;
     }
 
     private void Awake() {
