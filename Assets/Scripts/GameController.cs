@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using TMPro;
 
 public class GameController : MonoBehaviour {
 
@@ -34,6 +35,8 @@ public class GameController : MonoBehaviour {
     public Team[] teams;
 
     public GameObject entityPrefab;
+
+    public GameObject turnText;
 
     private int currentTeam = 0;
 
@@ -451,6 +454,7 @@ public class GameController : MonoBehaviour {
         teams[currentTeam].OnTurnEnd();
         currentTeam = (currentTeam + 1) % teams.Length;
         teams[currentTeam].OnTurnStart();
+        turnText.GetComponent<TextMeshProUGUI>().text = "Player " + (currentTeam + 1) + "'s turn";
     }
 
     void AddTeams() {

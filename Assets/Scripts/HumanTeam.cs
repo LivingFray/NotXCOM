@@ -25,6 +25,9 @@ public class HumanTeam : Team {
 
     public override void OnTurnStart() {
         turnActive = true;
+        foreach (EntityController ent in entities) {
+            ent.actionsSpent = false;
+        }
         //Update UI stuff
     }
 
@@ -32,6 +35,7 @@ public class HumanTeam : Team {
         for (int i = 0; i < spawnPositions.Length; i++) {
             GameObject newEnt = Object.Instantiate(entityPrefab, spawnPositions[i], Quaternion.identity);
             Controller.entities.Add(newEnt);
+            entities.Add(newEnt.GetComponent<EntityController>());
             newEnt.GetComponent<EntityController>().team = this;
         }
     }
@@ -41,6 +45,7 @@ public class HumanTeam : Team {
         if (turnActive) {
             if (currentEntity != null) {
                 currentEntity.FollowPath(Controller.FindPath(currentEntity.GridPos, tile.gridPos));
+                CheckActionsLeft();
             }
         }
     }
@@ -53,5 +58,14 @@ public class HumanTeam : Team {
         if(Input.GetKeyDown(KeyCode.End)) {
             Controller.NextTurn();
         }
+    }
+
+    void CheckActionsLeft() {
+        foreach (EntityController ent in entities) {
+            if(!ent.actionsSpent) {
+                return;
+            }
+        }
+        Controller.NextTurn();
     }
 }

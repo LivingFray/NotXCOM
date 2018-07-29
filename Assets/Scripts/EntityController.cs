@@ -13,6 +13,8 @@ public class EntityController : MonoBehaviour {
 
     public int movementPoints = 12;
 
+    public bool actionsSpent = false;
+
     public Vector3Int GridPos { get; private set; }
 
     public void SetPosition(Vector3Int position) {
@@ -41,7 +43,11 @@ public class EntityController : MonoBehaviour {
             Debug.LogWarning("No path to follow");
             return;
         }
+        if(actionsSpent || path.Length > movementPoints) {
+            return;
+        }
         StartCoroutine(Path_Coroutine(path));
+        actionsSpent = true;
     }
 
     IEnumerator Path_Coroutine(Vector3Int[] path) {
