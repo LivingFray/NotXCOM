@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class EntityController : MonoBehaviour {
 
@@ -8,6 +9,8 @@ public class EntityController : MonoBehaviour {
     public Team team;
     [HideInInspector]
     public GameController controller;
+
+    public TextMeshProUGUI healthText;
 
     public float movementSpeed = 5.0f;
 
@@ -17,7 +20,9 @@ public class EntityController : MonoBehaviour {
 
     public Vector3Int GridPos { get; private set; }
 
-    public int health = 5;
+    public int maxHealth = 5;
+
+    int health;
 
     //Other stats like aim, defence, etc here
 
@@ -114,12 +119,15 @@ public class EntityController : MonoBehaviour {
             health = 0;
             //Do death
             //Doesn't remove from list yet
-            enabled = false;
+            gameObject.SetActive(false);
         }
+        healthText.text = "Health: " + health + "/" + maxHealth;
     }
 
     private void Awake() {
         GridPos = new Vector3Int((int)transform.position.x, (int)transform.position.y, (int)transform.position.z);
+        health = maxHealth;
+        healthText.text = "Health: " + health + "/" + maxHealth;
     }
 
     private void OnMouseDown() {
