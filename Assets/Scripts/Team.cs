@@ -20,7 +20,7 @@ public abstract class Team {
     public abstract void EnemyClicked(EntityController entity);
 
     //Called when a tile is clicked on
-    public abstract void TileClicked(TileController tile);
+    public abstract void TileClicked(Tile tile);
 
     //Adds the entities belonging to the team to the game
     public abstract void PopulateEntities();

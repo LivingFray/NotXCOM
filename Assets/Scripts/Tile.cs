@@ -8,7 +8,7 @@
 enum CoverType {NONE, HALF, FULL};
 enum CoverSides {NEGX, POSX, NEGY, POSY, NEGZ, POSZ};
 
-public class TileController {
+public class Tile {
 
     public GameController controller;
 
@@ -66,12 +66,12 @@ public class TileController {
     GameObject _tile;
 
     //May or may not exist, refers to the physical representation of the tile
-    public GameObject Tile { get { return _tile; } set {
+    public GameObject TileObject { get { return _tile; } set {
             _tile = value;
             _tile.GetComponent<TileInput>().tileController = this;
         } }
 
-    public TileController(GameController controller) {
+    public Tile(GameController controller) {
         cover = new Cover();
         this.controller = controller;
     }

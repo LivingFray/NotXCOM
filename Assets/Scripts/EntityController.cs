@@ -83,7 +83,6 @@ public class EntityController : MonoBehaviour {
         if (los) {
             float hitChance = GetHitChance(enemy, cover);
             if(Random.Range(0.0f, 1.0f) < hitChance) {
-                Debug.Log("Hit target (" + hitChance * 100.0f + "%)");
                 int damage = Random.Range(minDamage, maxDamage + 1);
                 enemy.Damage(damage);
                 ShowHitIndicator(hitChance, damage, enemy);

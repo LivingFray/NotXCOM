@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TileInput : MonoBehaviour {
 
-    public TileController tileController;
+    public Tile tileController;
 
     private void OnMouseOver() {
         if (Input.GetMouseButtonDown(1)) {

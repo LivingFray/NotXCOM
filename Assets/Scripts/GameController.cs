@@ -6,7 +6,7 @@ using TMPro;
 
 public class GameController : MonoBehaviour {
 
-    TileController[,,] heightmap;
+    Tile[,,] heightmap;
 
     public int width = 20;
     public int height = 20;
@@ -149,7 +149,7 @@ public class GameController : MonoBehaviour {
 
     byte GetCoverValue(Vector3Int t1, Vector3Int t2, byte f1, byte f2) {
         //Get the tile controllers for both tiles to check
-        TileController tCon1 = GetTileController(t1), tCon2 = GetTileController(t2);
+        Tile tCon1 = GetTileController(t1), tCon2 = GetTileController(t2);
         if (tCon1 == null || tCon2 == null) {
             Debug.LogWarning("Missing tile controller!");
             return 0;
@@ -357,8 +357,8 @@ public class GameController : MonoBehaviour {
 
     //Tests if a unit can move from one tile to the other
     bool CanTraverse(Vector3Int first, Vector3Int last) {
-        TileController firstTile = GetTileController(first);
-        TileController lastTile = GetTileController(last);
+        Tile firstTile = GetTileController(first);
+        Tile lastTile = GetTileController(last);
         //Moving Left
         if (last.x < first.x) {
             if (firstTile.cover.negativeX == (byte)CoverType.FULL) {
@@ -437,12 +437,12 @@ public class GameController : MonoBehaviour {
     // Use this for initialization
     void Start() {
         //Initialise map
-        heightmap = new TileController[width, height, depth];
+        heightmap = new Tile[width, height, depth];
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < depth; z++) {
                     //Associate grid positions
-                    heightmap[x, y, z] = new TileController(this) {
+                    heightmap[x, y, z] = new Tile(this) {
                         gridPos = new Vector3Int(x, y, z)
                     };
                 }
@@ -504,40 +504,40 @@ public class GameController : MonoBehaviour {
         //Ground floor
         for (int x = 0; x < width; x++) {
             for (int z = 0; z < depth; z++) {
-                TileController tc = heightmap[x, 0, z];
-                if (tc.Tile == null) {
+                Tile tc = heightmap[x, 0, z];
+                if (tc.TileObject == null) {
                     GameObject newTile = Instantiate(tile, tc.gridPos, Quaternion.identity, gameObject.transform);
-                    tc.Tile = newTile;
+                    tc.TileObject = newTile;
                     SetTileObject(newTile);
                 }
                 tc.cover.SetCover((byte)CoverSides.NEGY, (byte)CoverType.FULL);
-                tc.Tile.transform.Find("NegY").gameObject.SetActive(true);
+                tc.TileObject.transform.Find("NegY").gameObject.SetActive(true);
             }
         }
         //Small wall section
         for (int z = 10; z < width; z++) {
             int y = 0;
             int x = 10;
-            TileController tc = heightmap[x, y, z];
-            if (tc.Tile == null) {
+            Tile tc = heightmap[x, y, z];
+            if (tc.TileObject == null) {
                 GameObject newTile = Instantiate(tile, tc.gridPos, Quaternion.identity, gameObject.transform);
-                tc.Tile = newTile;
+                tc.TileObject = newTile;
                 SetTileObject(newTile);
             }
             tc.cover.SetCover((byte)CoverSides.NEGX, (byte)CoverType.FULL);
-            tc.Tile.transform.Find("NegX").gameObject.SetActive(true);
+            tc.TileObject.transform.Find("NegX").gameObject.SetActive(true);
         }
         //Small raised area
         for (int x = 10; x < width - 5; x++) {
             for (int z = 0; z < depth - 10; z++) {
-                TileController tc = heightmap[x, 2, z];
-                if (tc.Tile == null) {
+                Tile tc = heightmap[x, 2, z];
+                if (tc.TileObject == null) {
                     GameObject newTile = Instantiate(tile, tc.gridPos, Quaternion.identity, gameObject.transform);
-                    tc.Tile = newTile;
+                    tc.TileObject = newTile;
                     SetTileObject(newTile);
                 }
                 tc.cover.SetCover((byte)CoverSides.NEGY, (byte)CoverType.FULL);
-                tc.Tile.transform.Find("NegY").gameObject.SetActive(true);
+                tc.TileObject.transform.Find("NegY").gameObject.SetActive(true);
             }
         }
     }
@@ -555,7 +555,7 @@ public class GameController : MonoBehaviour {
     }
 
     //Gets the TileController for a specified tile (returns null if out of bounds)
-    private TileController GetTileController(Vector3Int pos) {
+    private Tile GetTileController(Vector3Int pos) {
         //Skip out of bounds
         if (pos.x < 0 || pos.y < 0 || pos.z < 0) {
             return null;
@@ -568,11 +568,11 @@ public class GameController : MonoBehaviour {
 
     //Gets the Tile GameObject for a specified tile (if it exists)
     private GameObject GetTile(Vector3Int pos) {
-        TileController tc = GetTileController(pos);
+        Tile tc = GetTileController(pos);
         if (tc == null) {
             return null;
         }
-        return tc.Tile;
+        return tc.TileObject;
     }
 
     public void EntityClicked(EntityController entity) {

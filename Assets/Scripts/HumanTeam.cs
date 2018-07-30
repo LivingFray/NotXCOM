@@ -45,7 +45,7 @@ public class HumanTeam : Team {
         }
     }
 
-    public override void TileClicked(TileController tile) {
+    public override void TileClicked(Tile tile) {
         if (turnActive) {
             if (currentEntity != null) {
                 currentEntity.FollowPath(Controller.FindPath(currentEntity.GridPos, tile.gridPos));
@@ -60,6 +60,7 @@ public class HumanTeam : Team {
 
     public override void OnTurnEnd() {
         currentEntity = null;
+        turnActive = false;
     }
 
     public override void Update() {
@@ -83,6 +84,7 @@ public class HumanTeam : Team {
             if (currentEntity.actions == 0) {
                 currentEntity = null;
                 Controller.entitySelect.SetActive(false);
+                CheckActionsLeft();
             }
         }
     }
