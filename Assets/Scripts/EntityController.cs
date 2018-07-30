@@ -12,6 +12,8 @@ public class EntityController : MonoBehaviour {
 
     public TextMeshProUGUI healthText;
 
+    public GameObject hitIndicator;
+
     public float movementSpeed = 5.0f;
 
     public int movementPoints = 12;
@@ -84,14 +86,28 @@ public class EntityController : MonoBehaviour {
                 Debug.Log("Hit target (" + hitChance * 100.0f + "%)");
                 int damage = Random.Range(minDamage, maxDamage + 1);
                 enemy.Damage(damage);
+                ShowHitIndicator(hitChance, damage, enemy);
             } else {
-                Debug.Log("Missed target (" + hitChance * 100.0f + "%)");
+                ShowHitIndicator(hitChance, 0, enemy);
             }
             //Pretty fire animations and such
         } else {
             Debug.Log("Shot blocked");
         }
         actions--;
+    }
+
+    void ShowHitIndicator(float hitOdds, int damage, EntityController enemy) {
+        string text;
+        string strOdds = (hitOdds * 100.0f).ToString("N0");
+        if(damage == 0) {
+            text = "Miss! (" + strOdds + "%)";
+        } else {
+            text = "-" + damage + " (" + strOdds + "%)";
+        }
+        GameObject hit = Instantiate(hitIndicator, enemy.transform.position, Quaternion.identity);
+        hit.transform.Find("HitIndicator").GetComponent<TextMeshProUGUI>().text = text;
+        Destroy(hit, 2.0f);
     }
 
     public float GetHitChance(EntityController enemy, byte coverType) {

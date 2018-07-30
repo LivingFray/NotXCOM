@@ -137,10 +137,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   controller: {fileID: 0}
   healthText: {fileID: 3733492308650304374}
+  hitIndicator: {fileID: 2885736531659478401, guid: 34e63d5ab8f5f5243808b7f71792400e,
+    type: 3}
   movementSpeed: 5
   movementPoints: 12
   actions: 2
-  health: 5
+  maxHealth: 5
   minDamage: 3
   maxDamage: 5
   aim: 0.6
