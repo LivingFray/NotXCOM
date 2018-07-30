@@ -124,6 +124,13 @@ MonoBehaviour:
   controller: {fileID: 0}
   movementSpeed: 5
   movementPoints: 12
+  actions: 2
+  health: 5
+  minDamage: 3
+  maxDamage: 5
+  aim: 0.6
+  distHitBase: 0.4
+  distHitFall: 0.045
 --- !u!65 &5391140557457725308
 BoxCollider:
   m_ObjectHideFlags: 0
