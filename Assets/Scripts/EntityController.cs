@@ -9,6 +9,8 @@ public class EntityController : MonoBehaviour {
     public Team team;
     [HideInInspector]
     public GameController controller;
+    [HideInInspector]
+    public Board board;
 
     public TextMeshProUGUI healthText;
 
@@ -79,7 +81,7 @@ public class EntityController : MonoBehaviour {
 
     public void ShootEnemy(EntityController enemy) {
         byte cover;
-        bool los = controller.HasLineOfSightDDA(GridPos, enemy.GridPos, out cover);
+        bool los = board.HasLineOfSight(GridPos, enemy.GridPos, out cover);
         if (los) {
             float hitChance = GetHitChance(enemy, cover);
             if(Random.Range(0.0f, 1.0f) < hitChance) {

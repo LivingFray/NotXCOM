@@ -42,13 +42,14 @@ public class HumanTeam : Team {
             entities.Add(ent);
             ent.team = this;
             ent.controller = Controller;
+            ent.board = GameBoard;
         }
     }
 
     public override void TileClicked(Tile tile) {
         if (turnActive) {
             if (currentEntity != null) {
-                currentEntity.FollowPath(Controller.FindPath(currentEntity.GridPos, tile.gridPos));
+                currentEntity.FollowPath(GameBoard.FindPath(currentEntity.GridPos, tile.gridPos));
                 if(currentEntity.actions == 0) {
                     currentEntity = null;
                     Controller.entitySelect.SetActive(false);

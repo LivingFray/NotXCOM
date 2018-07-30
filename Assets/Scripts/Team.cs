@@ -5,6 +5,9 @@ public abstract class Team {
     //The game controller
     public GameController Controller { get; set; }
 
+    //The game board
+    public Board GameBoard { get; set; }
+
     protected List<EntityController> entities = new List<EntityController>();
 
     //Called when a team's turn begins
