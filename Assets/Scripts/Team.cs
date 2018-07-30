@@ -28,4 +28,7 @@ public abstract class Team {
     //Called every frame
     public abstract void Update();
 
+    //Called when an entity dies
+    public abstract void EntityDied(EntityController entity);
+
 }

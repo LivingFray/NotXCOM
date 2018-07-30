@@ -119,6 +119,7 @@ public class EntityController : MonoBehaviour {
             health = 0;
             //Do death
             //Doesn't remove from list yet
+            team.EntityDied(this);
             gameObject.SetActive(false);
         }
         healthText.text = "Health: " + health + "/" + maxHealth;

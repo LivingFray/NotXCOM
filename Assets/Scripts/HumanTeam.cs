@@ -86,4 +86,18 @@ public class HumanTeam : Team {
             }
         }
     }
+
+    public override void EntityDied(EntityController entity) {
+        if(currentEntity == entity) {
+            currentEntity = null;
+        }
+        if(!entities.Remove(entity)) {
+            Debug.LogWarning("Attempted to remove entity not in list");
+        } else {
+            Controller.EntityDied(entity);
+            if(entities.Count == 0) {
+                Controller.TeamDied(this);
+            }
+        }
+    }
 }

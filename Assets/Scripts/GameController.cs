@@ -581,4 +581,14 @@ public class GameController : MonoBehaviour {
         }
         teams[currentTeam].EnemyClicked(entity);
     }
+
+    public void EntityDied(EntityController entity) {
+        if(!entities.Remove(entity.gameObject)) {
+            Debug.LogWarning("Tried to remove entity that didn't exist");
+        }
+    }
+
+    public void TeamDied(Team team) {
+        Debug.Log("GAME OVER");
+    }
 }
