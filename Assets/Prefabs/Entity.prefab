@@ -135,7 +135,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 357d93aab6710ea499fe54b940df7e75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  controller: {fileID: 0}
+  abilities:
+  - {fileID: 11400000, guid: 572332af3ef51e94bb272f17589f2e3b, type: 2}
   healthText: {fileID: 3733492308650304374}
   hitIndicator: {fileID: 2885736531659478401, guid: 34e63d5ab8f5f5243808b7f71792400e,
     type: 3}
@@ -143,6 +144,7 @@ MonoBehaviour:
   movementPoints: 12
   actions: 2
   maxHealth: 5
+  entityUI: {fileID: 0}
   minDamage: 3
   maxDamage: 5
   aim: 0.6

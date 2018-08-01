@@ -31,6 +31,8 @@ public class GameController : MonoBehaviour {
 
     public GameObject entitySelect;
 
+    public GameObject entityUI;
+
     private int currentTeam = 0;
 
 
@@ -102,14 +104,14 @@ public class GameController : MonoBehaviour {
         teams[currentTeam].TileClicked(board.GetTile(tile));
     }
 
-    public void EntityClicked(EntityController entity) {
+    public void EntityClicked(Entity entity) {
         if(entity.team == teams[currentTeam]) {
             return;
         }
         teams[currentTeam].EnemyClicked(entity);
     }
 
-    public void EntityDied(EntityController entity) {
+    public void EntityDied(Entity entity) {
         if(!entities.Remove(entity.gameObject)) {
             Debug.LogWarning("Tried to remove entity that didn't exist");
         }

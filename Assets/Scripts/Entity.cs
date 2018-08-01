@@ -1,16 +1,20 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 using TMPro;
+using System.Collections.Generic;
 
-public class EntityController : MonoBehaviour {
+public class Entity : MonoBehaviour {
 
-    [HideInInspector]
+    [NonSerialized]
     public Team team;
-    [HideInInspector]
+    [NonSerialized]
     public GameController controller;
-    [HideInInspector]
+
+    [NonSerialized]
     public Board board;
+
+    public Ability[] abilities;
 
     public TextMeshProUGUI healthText;
 
@@ -28,6 +32,14 @@ public class EntityController : MonoBehaviour {
 
     int health;
 
+    List<Entity> visibleEntities;
+    List<byte> visibleEntitiesCover;
+    int selectedEntity;
+
+    public GameObject entityUI;
+
+    UIController uiController;
+    
     //Other stats like aim, defence, etc here
 
     //TODO: Refactor attacks to be separate class
@@ -79,26 +91,7 @@ public class EntityController : MonoBehaviour {
         }
     }
 
-    public void ShootEnemy(EntityController enemy) {
-        byte cover;
-        bool los = board.HasLineOfSight(GridPos, enemy.GridPos, out cover);
-        if (los) {
-            float hitChance = GetHitChance(enemy, cover);
-            if(Random.Range(0.0f, 1.0f) < hitChance) {
-                int damage = Random.Range(minDamage, maxDamage + 1);
-                enemy.Damage(damage);
-                ShowHitIndicator(hitChance, damage, enemy);
-            } else {
-                ShowHitIndicator(hitChance, 0, enemy);
-            }
-            //Pretty fire animations and such
-        } else {
-            Debug.Log("Shot blocked");
-        }
-        actions--;
-    }
-
-    void ShowHitIndicator(float hitOdds, int damage, EntityController enemy) {
+    public void ShowHitIndicator(float hitOdds, int damage, Entity enemy) {
         string text;
         string strOdds = (hitOdds * 100.0f).ToString("N0");
         if(damage == 0) {
@@ -111,7 +104,7 @@ public class EntityController : MonoBehaviour {
         Destroy(hit, 2.0f);
     }
 
-    public float GetHitChance(EntityController enemy, byte coverType) {
+    public float GetHitChance(Entity enemy, byte coverType) {
         //Debug.Log("Aim: " + aim);
         //TODO: Make calculation more flexible / setting based
         //Calculate hit chance:
@@ -135,11 +128,61 @@ public class EntityController : MonoBehaviour {
         if(health <= 0) {
             health = 0;
             //Do death
-            //Doesn't remove from list yet
             team.EntityDied(this);
             gameObject.SetActive(false);
         }
         healthText.text = "Health: " + health + "/" + maxHealth;
+    }
+
+    public void UpdateVisibleEntities() {
+        //Find all visible entities
+        visibleEntities.Clear();
+        visibleEntitiesCover.Clear();
+        foreach (GameObject entObj in controller.entities) {
+            Entity ent = entObj.GetComponent<Entity>();
+            if (ent == null || ent.team == team) {
+                continue;
+            }
+            byte cover;
+            if (board.HasLineOfSight(GridPos, ent.GridPos, out cover)) {
+                visibleEntities.Add(ent);
+                visibleEntitiesCover.Add(cover);
+            }
+        }
+        //Sort by hit chance?
+
+        selectedEntity = 0;
+    }
+
+    public Entity GetSelectedEntity(out byte cover) {
+        cover = 0;
+        //Ensure a target exists
+        if (selectedEntity >= visibleEntities.Count) {
+            return null;
+        }
+        //TODO: Get weapon from entity and extract values that way
+        Entity enemy = visibleEntities[selectedEntity];
+        cover = visibleEntitiesCover[selectedEntity];
+        return enemy;
+    }
+
+    public void OnSelected() {
+        CreateUnitUI();
+    }
+
+    public void OnDeselected() {
+        DestroyUnitUI();
+    }
+
+    void CreateUnitUI() {
+        if(uiController == null) {
+            uiController = entityUI.GetComponent<UIController>();
+        }
+        uiController.AddAbilities(abilities, this);
+    }
+
+    void DestroyUnitUI() {
+        uiController.ClearAbilities();
     }
 
     private void Awake() {
@@ -149,6 +192,8 @@ public class EntityController : MonoBehaviour {
     }
 
     private void OnMouseDown() {
+        visibleEntities = new List<Entity>();
+        visibleEntitiesCover = new List<byte>();
         team.EntityClicked(this);
     }
 }

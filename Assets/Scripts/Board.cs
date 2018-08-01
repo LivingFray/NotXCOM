@@ -311,7 +311,7 @@ public class Board : MonoBehaviour {
 
     bool IsOccupied(Vector3Int tile) {
         foreach (GameObject ent in controller.entities) {
-            if (ent.GetComponent<EntityController>().GridPos == tile) {
+            if (ent.GetComponent<Entity>().GridPos == tile) {
                 return true;
             }
         }
