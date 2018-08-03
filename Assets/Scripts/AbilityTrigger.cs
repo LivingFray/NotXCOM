@@ -1,18 +1,15 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class AbilityButton : MonoBehaviour, IPointerDownHandler{
-
-    public int id;
-
+public class AbilityTrigger : MonoBehaviour, IPointerDownHandler {
     UIController controller;
 
     public void OnPointerDown(PointerEventData eventData) {
-        controller.AbilityClicked(id);
+        controller.TriggerAbility();
     }
 
-    void Start () {
+    void Start() {
         controller = GetComponentInParent<UIController>();
-	}
+    }
 
 }

@@ -10,7 +10,6 @@ public class Entity : MonoBehaviour {
     public Team team;
     [NonSerialized]
     public GameController controller;
-
     [NonSerialized]
     public Board board;
 
@@ -134,6 +133,11 @@ public class Entity : MonoBehaviour {
         healthText.text = "Health: " + health + "/" + maxHealth;
     }
 
+    public void ShowVisibleEntities() {
+        UpdateVisibleEntities();
+        uiController.AddEnemies(visibleEntities, this);
+    }
+
     public void UpdateVisibleEntities() {
         //Find all visible entities
         visibleEntities.Clear();
@@ -166,6 +170,13 @@ public class Entity : MonoBehaviour {
         return enemy;
     }
 
+    public void SetSelectedEntity(int pos) {
+        if(pos < 0 || pos >= visibleEntities.Count) {
+            return;
+        }
+        selectedEntity = pos;
+    }
+
     public void OnSelected() {
         CreateUnitUI();
     }
@@ -182,18 +193,18 @@ public class Entity : MonoBehaviour {
     }
 
     void DestroyUnitUI() {
-        uiController.ClearAbilities();
+        uiController.RemoveEntity();
     }
 
     private void Awake() {
         GridPos = new Vector3Int((int)transform.position.x, (int)transform.position.y, (int)transform.position.z);
         health = maxHealth;
         healthText.text = "Health: " + health + "/" + maxHealth;
+        visibleEntities = new List<Entity>();
+        visibleEntitiesCover = new List<byte>();
     }
 
     private void OnMouseDown() {
-        visibleEntities = new List<Entity>();
-        visibleEntitiesCover = new List<byte>();
         team.EntityClicked(this);
     }
 }

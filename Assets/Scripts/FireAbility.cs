@@ -9,9 +9,9 @@ public class FireAbility : Ability {
     protected override void SelectActionImpl(Entity entity) {
         entity.UpdateVisibleEntities();
         //Request UI change in entity
-
+        entity.ShowVisibleEntities();
         //Temp shoot at first
-        TriggerAction(entity);
+        //TriggerAction(entity);
     }
 
     public override void TriggerAction(Entity entity) {
