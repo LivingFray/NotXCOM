@@ -52,10 +52,11 @@ public class UIController : MonoBehaviour {
     //TODO: Hover
 
     public void AbilityClicked(int aNo) {
-        currentAbility = aNo;
-        fireButton.SetActive(true);
-        fireText.text = entity.abilities[aNo].abilityName;
-        entity.abilities[aNo].SelectAction(entity);
+        if (entity.abilities[aNo].SelectAction(entity)) {
+            currentAbility = aNo;
+            fireButton.SetActive(true);
+            fireText.text = entity.abilities[aNo].abilityName;
+        }
     }
 
     public void EnemyClicked(int eNo) {

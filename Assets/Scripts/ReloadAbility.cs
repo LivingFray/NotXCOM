@@ -5,11 +5,12 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Abilities/Reload")]
 public class ReloadAbility : Ability {
 
-    protected override void SelectActionImpl(Entity entity) {
+    protected override bool SelectActionImpl(Entity entity) {
         if (entity.ammo == entity.gun.maxAmmo) {
             Debug.Log("Already reloaded");
-            return;
+            return false;
         }
+        return true;
     }
 
     public override void TriggerAction(Entity entity) {

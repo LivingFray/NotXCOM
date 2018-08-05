@@ -15,14 +15,14 @@ public abstract class Ability : ScriptableObject {
     public bool endsTurn;
 
     //Called when an action for an entity is selected (usually through UI)
-    public void SelectAction(Entity entity) {
+    public bool SelectAction(Entity entity) {
         if (entity.actions < cost) {
-            return;
+            return false;
         }
-        SelectActionImpl(entity);
+        return SelectActionImpl(entity);
     }
 
-    protected abstract void SelectActionImpl(Entity entity);
+    protected abstract bool SelectActionImpl(Entity entity);
 
     //Called when the action is confirmed (happens after being selected)
     public virtual void TriggerAction(Entity entity) {

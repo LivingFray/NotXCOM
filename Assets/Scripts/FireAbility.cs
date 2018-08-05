@@ -6,14 +6,15 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Abilities/Fire")]
 public class FireAbility : Ability {
 
-    protected override void SelectActionImpl(Entity entity) {
+    protected override bool SelectActionImpl(Entity entity) {
         if(entity.ammo == 0) {
             Debug.Log("Not enough ammo");
-            return;
+            return false;
         }
         entity.UpdateVisibleEntities();
         //Request UI change in entity
         entity.ShowVisibleEntities();
+        return true;
     }
 
     public override void TriggerAction(Entity entity) {
