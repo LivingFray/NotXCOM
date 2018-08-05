@@ -41,15 +41,12 @@ public class Entity : MonoBehaviour {
     
     //Other stats like aim, defence, etc here
 
-    //TODO: Refactor attacks to be separate class
-    //TODO: Make damage dealt a stat of weapon
-    public int minDamage = 3;
-    public int maxDamage = 5;
-
     public float aim = 0.6f;
 
-    public float distHitBase = 0.4f;
-    public float distHitFall = 0.045f;
+    public Gun gun;
+
+    [HideInInspector]
+    public int ammo;
 
     public void SetPosition(Vector3Int position) {
         GridPos = position;
@@ -108,7 +105,7 @@ public class Entity : MonoBehaviour {
         //TODO: Make calculation more flexible / setting based
         //Calculate hit chance:
         //TODO: Aiming angles: better angle = better chance
-        float distanceModifier = distHitBase - distHitFall * (GridPos - enemy.GridPos).magnitude;
+        float distanceModifier = gun.baseHitChance - gun.hitChanceFalloff * (GridPos - enemy.GridPos).magnitude;
         //Debug.Log("Distance: " + distanceModifier);
         float coverModifier;
         if(coverType == (byte)CoverType.FULL) {
@@ -202,6 +199,7 @@ public class Entity : MonoBehaviour {
         healthText.text = "Health: " + health + "/" + maxHealth;
         visibleEntities = new List<Entity>();
         visibleEntitiesCover = new List<byte>();
+        ammo = gun.maxAmmo;
     }
 
     private void OnMouseDown() {

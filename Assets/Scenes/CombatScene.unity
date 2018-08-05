@@ -11,8 +11,9 @@ GameObject:
   - component: {fileID: 73429365}
   - component: {fileID: 73429367}
   - component: {fileID: 73429366}
+  - component: {fileID: 73429368}
   m_Layer: 5
-  m_Name: TextMeshPro Text
+  m_Name: AbilityButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -25,16 +26,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 73429364}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.3333334, y: 10, z: 1}
   m_Children: []
-  m_Father: {fileID: 1464352725}
-  m_RootOrder: 2
+  m_Father: {fileID: 949856784}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: 165}
+  m_AnchoredPosition: {x: 0, y: 1150}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &73429367
@@ -158,6 +159,18 @@ MonoBehaviour:
   - {fileID: 0}
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &73429368
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 73429364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f51f0e1e5b3d504e9cdc3ab5b22ee5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &170076733
 GameObject:
   m_ObjectHideFlags: 0
@@ -682,7 +695,8 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.75, y: 0.1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 73429365}
   m_Father: {fileID: 1464352725}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -790,7 +804,6 @@ RectTransform:
   m_Children:
   - {fileID: 254352710}
   - {fileID: 949856784}
-  - {fileID: 73429365}
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -855,6 +868,8 @@ MonoBehaviour:
     type: 3}
   enemyImage: {fileID: 4851158986735078941, guid: 5065d8647d85e964b90a7f6708f9c424,
     type: 3}
+  fireButton: {fileID: 73429364}
+  panel: {fileID: 949856783}
   abilitySpacing: 50
   enemySpacing: 20
 --- !u!1 &1757759883

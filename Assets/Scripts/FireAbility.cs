@@ -7,11 +7,13 @@ using UnityEngine;
 public class FireAbility : Ability {
 
     protected override void SelectActionImpl(Entity entity) {
+        if(entity.ammo == 0) {
+            Debug.Log("Not enough ammo");
+            return;
+        }
         entity.UpdateVisibleEntities();
         //Request UI change in entity
         entity.ShowVisibleEntities();
-        //Temp shoot at first
-        //TriggerAction(entity);
     }
 
     public override void TriggerAction(Entity entity) {
@@ -22,8 +24,9 @@ public class FireAbility : Ability {
             return;
         }
         float hitChance = entity.GetHitChance(enemy, cover);
+        entity.ammo--;
         if (Random.Range(0.0f, 1.0f) < hitChance) {
-            int damage = Random.Range(entity.minDamage, entity.maxDamage + 1);
+            int damage = Random.Range(entity.gun.minDamage, entity.gun.maxDamage + 1);
             enemy.Damage(damage);
             entity.ShowHitIndicator(hitChance, damage, enemy);
         } else {
