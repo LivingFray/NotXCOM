@@ -1,13 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(menuName = "Abilities/Reload")]
 public class ReloadAbility : Ability {
 
     protected override bool SelectActionImpl(Entity entity) {
         if (entity.ammo == entity.gun.maxAmmo) {
-            Debug.Log("Already reloaded");
             return false;
         }
         return true;

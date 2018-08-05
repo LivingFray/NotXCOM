@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78555df682378b84e957899c1636fb21, type: 3}
   m_Name: ReloadAbility
   m_EditorClassIdentifier: 
-  icon: {fileID: 0}
-  abilityName: 
-  description: 
-  cost: 0
+  icon: {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}
+  abilityName: Reload
+  description: Reloads your weapon
+  cost: 1
   endsTurn: 0

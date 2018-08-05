@@ -3,6 +3,7 @@ using System;
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
 public class Entity : MonoBehaviour {
 
@@ -203,6 +204,8 @@ public class Entity : MonoBehaviour {
     }
 
     private void OnMouseDown() {
-        team.EntityClicked(this);
+        if (!EventSystem.current.IsPointerOverGameObject()) {
+            team.EntityClicked(this);
+        }
     }
 }

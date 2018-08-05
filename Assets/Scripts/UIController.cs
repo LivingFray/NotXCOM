@@ -25,6 +25,8 @@ public class UIController : MonoBehaviour {
 
     public GameObject panel;
 
+    CameraController camController;
+
     public float abilitySpacing = 50.0f;
     public float enemySpacing = 20.0f;
 
@@ -46,6 +48,7 @@ public class UIController : MonoBehaviour {
             enemies[i].GetComponent<EnemyButton>().id = i;
         }
         fireText = fireButton.GetComponent<TMPro.TextMeshProUGUI>();
+        camController = Camera.main.GetComponent<CameraController>();
         RemoveEntity();
     }
 
@@ -61,6 +64,7 @@ public class UIController : MonoBehaviour {
 
     public void EnemyClicked(int eNo) {
         entity.SetSelectedEntity(eNo);
+        LookAtEnemy();
     }
 
     public void AddAbilities(Ability[] abilities, Entity e) {
@@ -82,6 +86,7 @@ public class UIController : MonoBehaviour {
         foreach (Image image in enemies) {
             image.gameObject.SetActive(false);
         }
+        camController.LeaveCloseUp();
     }
 
     public void AddEnemies(List<Entity> enemies, Entity e) {
@@ -91,11 +96,23 @@ public class UIController : MonoBehaviour {
             this.enemies[i].gameObject.SetActive(true);
             //this.enemies[i].sprite = enemies[i].icon;
         }
+        //Change camera
+        LookAtEnemy();
     }
 
     public void TriggerAbility() {
         if(entity != null) {
             entity.abilities[currentAbility].TriggerAction(entity);
         }
+    }
+
+    void LookAtEnemy() {
+        if(entity == null) {
+            return;
+        }
+        byte _;
+        Entity target = entity.GetSelectedEntity(out _);
+        camController.LeaveCloseUp();
+        camController.EnterCloseUp(entity.GridPos, target.GridPos);
     }
 }

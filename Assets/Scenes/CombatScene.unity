@@ -496,6 +496,10 @@ MonoBehaviour:
   edgeSize: 0.05
   cameraSpeed: 4
   zoom: 10
+  offset: {x: 0, y: 3, z: -2}
+  from: {x: 5, y: 0, z: 5}
+  to: {x: -10, y: 0, z: -10}
+  DEBUG_TRIGGER: 0
 --- !u!1 &795413367
 GameObject:
   m_ObjectHideFlags: 0

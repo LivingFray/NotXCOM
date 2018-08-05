@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 
 [CreateAssetMenu(menuName = "Abilities/Fire")]
@@ -8,7 +6,6 @@ public class FireAbility : Ability {
 
     protected override bool SelectActionImpl(Entity entity) {
         if(entity.ammo == 0) {
-            Debug.Log("Not enough ammo");
             return false;
         }
         entity.UpdateVisibleEntities();
