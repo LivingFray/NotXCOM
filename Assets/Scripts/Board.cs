@@ -310,8 +310,9 @@ public class Board : MonoBehaviour {
     }
 
     bool IsOccupied(Vector3Int tile) {
-        foreach (GameObject ent in controller.entities) {
-            if (ent.GetComponent<Entity>().GridPos == tile) {
+        //TODO: When moving entity update lookup table
+        foreach (Entity ent in controller.entities) {
+            if (ent.health > 0 && ent.GridPos == tile) {
                 return true;
             }
         }

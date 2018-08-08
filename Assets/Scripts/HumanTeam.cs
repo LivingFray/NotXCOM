@@ -34,7 +34,9 @@ public class HumanTeam : Team {
     public override void OnTurnStart() {
         turnActive = true;
         foreach (Entity ent in entities) {
-            ent.actions = 2;
+            if (ent.health > 0) {
+                ent.actions = 2;
+            }
         }
         //Update UI stuff
     }
@@ -43,7 +45,7 @@ public class HumanTeam : Team {
         for (int i = 0; i < spawnPositions.Length; i++) {
             GameObject newEnt = Object.Instantiate(entityPrefab, spawnPositions[i], Quaternion.identity);
             Entity ent = newEnt.GetComponent<Entity>();
-            Controller.entities.Add(newEnt);
+            Controller.entities.Add(ent);
             entities.Add(ent);
             ent.team = this;
             ent.controller = Controller;
@@ -56,10 +58,12 @@ public class HumanTeam : Team {
         if (turnActive) {
             if (currentEntity != null) {
                 currentEntity.FollowPath(GameBoard.FindPath(currentEntity.GridPos, tile.gridPos));
-                if(currentEntity.actions == 0) {
-                    currentEntity.OnDeselected();
-                    currentEntity = null;
-                    Controller.entitySelect.SetActive(false);
+                if (currentEntity != null) {
+                    if (currentEntity.actions == 0) {
+                        currentEntity.OnDeselected();
+                        currentEntity = null;
+                        Controller.entitySelect.SetActive(false);
+                    }
                 }
                 CheckActionsLeft();
             }
@@ -82,7 +86,7 @@ public class HumanTeam : Team {
 
     void CheckActionsLeft() {
         foreach (Entity ent in entities) {
-            if(ent.actions != 0) {
+            if(ent.actions != 0 && ent.health > 0) {
                 return;
             }
         }
@@ -107,6 +111,7 @@ public class HumanTeam : Team {
         if(currentEntity == entity) {
             currentEntity = null;
         }
+        /*
         if(!entities.Remove(entity)) {
             Debug.LogWarning("Attempted to remove entity not in list");
         } else {
@@ -115,6 +120,7 @@ public class HumanTeam : Team {
                 Controller.TeamDied(this);
             }
         }
+        */
     }
 
     public override void AbilityClicked() {
@@ -122,6 +128,7 @@ public class HumanTeam : Team {
             currentEntity.OnDeselected();
             Controller.entitySelect.SetActive(false);
             currentEntity = null;
+            CheckActionsLeft();
         }
     }
 }

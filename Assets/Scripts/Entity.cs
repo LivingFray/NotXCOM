@@ -30,7 +30,7 @@ public class Entity : MonoBehaviour {
 
     public int maxHealth = 5;
 
-    int health;
+    public int health;
 
     List<Entity> visibleEntities;
     List<byte> visibleEntitiesCover;
@@ -48,6 +48,8 @@ public class Entity : MonoBehaviour {
 
     [HideInInspector]
     public int ammo;
+
+    public bool onOverwatch;
 
     public void SetPosition(Vector3Int position) {
         GridPos = position;
@@ -84,6 +86,7 @@ public class Entity : MonoBehaviour {
 
     IEnumerator Path_Coroutine(Vector3Int[] path) {
         for (int i = 0; i < path.Length; i++) {
+            controller.EntityMoved(this, path[i]);
             yield return Move_Coroutine(path[i]);
         }
     }
@@ -140,9 +143,8 @@ public class Entity : MonoBehaviour {
         //Find all visible entities
         visibleEntities.Clear();
         visibleEntitiesCover.Clear();
-        foreach (GameObject entObj in controller.entities) {
-            Entity ent = entObj.GetComponent<Entity>();
-            if (ent == null || ent.team == team) {
+        foreach (Entity ent in controller.entities) {
+            if (ent.team == team) {
                 continue;
             }
             byte cover;
@@ -192,6 +194,10 @@ public class Entity : MonoBehaviour {
 
     void DestroyUnitUI() {
         uiController.RemoveEntity();
+    }
+
+    public void TriggerOverwatch(Entity target) {
+        onOverwatch = !gun.Fire(this, target);
     }
 
     private void Awake() {

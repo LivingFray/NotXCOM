@@ -18,18 +18,10 @@ public class FireAbility : Ability {
         //TODO: Get weapon from entity and extract values that way
         byte cover;
         Entity enemy = entity.GetSelectedEntity(out cover);
-        if(enemy == null) {
+        if (enemy == null) {
             return;
         }
-        float hitChance = entity.GetHitChance(enemy, cover);
-        entity.ammo--;
-        if (Random.Range(0.0f, 1.0f) < hitChance) {
-            int damage = Random.Range(entity.gun.minDamage, entity.gun.maxDamage + 1);
-            enemy.Damage(damage);
-            entity.ShowHitIndicator(hitChance, damage, enemy);
-        } else {
-            entity.ShowHitIndicator(hitChance, 0, enemy);
-        }
+        entity.gun.Fire(entity, enemy);
         //Pretty fire animations and such
 
         base.TriggerAction(entity);

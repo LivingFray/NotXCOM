@@ -22,7 +22,7 @@ public class GameController : MonoBehaviour {
     public int maxFallHeight = 4;
 
     //TODO: Make private?
-    public List<GameObject> entities;
+    public List<Entity> entities;
     public Team[] teams;
 
     public GameObject entityPrefab;
@@ -92,6 +92,22 @@ public class GameController : MonoBehaviour {
         teams[0].OnTurnStart();
     }
 
+    //Called when an entity enters a tile
+    public void EntityMoved(Entity ent, Vector3Int newTile) {
+        //Loop through players in overwatch and test for shot
+        //TODO: Track overwatched players separately?
+        foreach(Entity e in entities) {
+            //Entity died
+            if(ent == null) {
+                break;
+            }
+            if(!e.onOverwatch || e.team == ent.team) {
+                continue;
+            }
+            e.TriggerOverwatch(ent);
+        }
+    }
+
     private void Update() {
         //Toggle begin/end node placement
         if (Input.GetKeyDown(KeyCode.Space)) {
@@ -109,12 +125,6 @@ public class GameController : MonoBehaviour {
             return;
         }
         teams[currentTeam].EnemyClicked(entity);
-    }
-
-    public void EntityDied(Entity entity) {
-        if(!entities.Remove(entity.gameObject)) {
-            Debug.LogWarning("Tried to remove entity that didn't exist");
-        }
     }
 
     public void TeamDied(Team team) {

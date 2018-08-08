@@ -1,5 +1,11 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!224 &1433504319411943230 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 5043689683383298312, guid: 4619ae6e4949be5408d9fb068ac56d4b,
+    type: 3}
+  m_PrefabInstance: {fileID: 6204304001129012790}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &3733492308650304374 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7334704523859295552, guid: 4619ae6e4949be5408d9fb068ac56d4b,
@@ -83,12 +89,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!224 &1433504319411943230 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 5043689683383298312, guid: 4619ae6e4949be5408d9fb068ac56d4b,
-    type: 3}
-  m_PrefabInstance: {fileID: 6204304001129012790}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &9190778563058772447
 GameObject:
   m_ObjectHideFlags: 0
@@ -138,6 +138,7 @@ MonoBehaviour:
   abilities:
   - {fileID: 11400000, guid: 572332af3ef51e94bb272f17589f2e3b, type: 2}
   - {fileID: 11400000, guid: 20a44bcdc5640ef40a7ebad328daf9dc, type: 2}
+  - {fileID: 11400000, guid: 0328361ff38856641b0e2fab7558be61, type: 2}
   healthText: {fileID: 3733492308650304374}
   hitIndicator: {fileID: 2885736531659478401, guid: 34e63d5ab8f5f5243808b7f71792400e,
     type: 3}
@@ -149,6 +150,7 @@ MonoBehaviour:
   aim: 0.6
   gun: {fileID: 11400000, guid: c912f42f6baa5ad4fa825be12e11c9a7, type: 2}
   ammo: 0
+  onOverwatch: 0
 --- !u!65 &5391140557457725308
 BoxCollider:
   m_ObjectHideFlags: 0
