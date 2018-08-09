@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e63d6da7bd091e549bd8a87140ba5383, type: 3}
-  m_Name: New OverwatchAbility
+  m_Name: OverwatchAbility
   m_EditorClassIdentifier: 
-  icon: {fileID: 0}
-  abilityName: 
-  description: 
-  cost: 0
-  endsTurn: 0
+  icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  abilityName: Overwatch
+  description: Fire at the first enemy to move into the unit's LOS
+  cost: 1
+  endsTurn: 1

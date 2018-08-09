@@ -46,10 +46,13 @@ public class GameController : MonoBehaviour {
         if(board == null) {
             Debug.LogError("Could not find board in controller");
         }
+        /*
         //Initialise map
         board.CreateBoard(20, 5, 20);
         //Create map
         board.GenerateTestBoard();
+        */
+        board.LoadBoard(GameObject.Find("Board"));
         //Create teams
         AddTeams();
         //Add entities

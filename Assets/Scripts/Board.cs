@@ -40,6 +40,52 @@ public class Board : MonoBehaviour {
         }
     }
 
+    public void LoadBoard(GameObject board) {
+        Debug.Log("Finding tiles...");
+        TileInput[] tiles = board.GetComponentsInChildren<TileInput>();
+        Debug.Log("Found " + tiles.Length + " tiles");
+        int minX = 0, minY = 0, minZ = 0;
+        int maxX = 0, maxY = 0, maxZ = 0;
+        for(int i = 0; i < tiles.Length; i++) {
+            int x = (int)tiles[i].transform.position.x;
+            int y = (int)tiles[i].transform.position.y;
+            int z = (int)tiles[i].transform.position.z;
+            if(i == 0) {
+                //Initialise bounding box
+                minX = maxX = x;
+                minY = maxY = y;
+                minZ = maxZ = z;
+            } else {
+                //Update min values
+                if(minX > x) {
+                    minX = x;
+                }
+                if(minY > y) {
+                    minY = y;
+                }
+                if(minZ > z) {
+                    minZ = z;
+                }
+                //Update max values
+                if (maxX < x) {
+                    maxX = x;
+                }
+                if (maxY < y) {
+                    maxY = y;
+                }
+                if (maxZ < z) {
+                    maxZ = z;
+                }
+            }
+        }
+        Debug.Log("New map bounding box identified: (" + minX + ", " + minY + ", " + minZ + ") - (" + maxX + ", " + maxY + ", " + maxZ + ")");
+        //Game board assumes a lower bound of (0, 0, 0) so offset board to fix
+        Debug.Log("Transforming board...");
+        board.transform.position -= new Vector3(minX, minY, minZ);
+        Debug.Log("Creating internal board representation");
+        CreateBoard(maxX - minX, maxY - minY, maxZ - minZ);
+    }
+
     #region LOS
     public bool HasLineOfSight(Vector3Int start, Vector3Int end, out byte cover) {
         //Iterate from start position to end position, checking for blocking cover

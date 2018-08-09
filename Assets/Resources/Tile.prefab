@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7900952039099179113}
   - component: {fileID: 6214051751557886463}
   - component: {fileID: 1663566397212853789}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: NegY
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -87,7 +87,7 @@ GameObject:
   - component: {fileID: 3998312543619192779}
   - component: {fileID: 5522070698309151784}
   - component: {fileID: 3374364016667392228}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: NegZ
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -163,7 +163,7 @@ GameObject:
   - component: {fileID: 4903026271178173598}
   - component: {fileID: 7889254905392203136}
   - component: {fileID: 7628177817021945768}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Tile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -202,6 +202,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03f02ea1d850a4d4792741204a0c803d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  negativeX: 1
+  positiveX: 1
+  negativeY: 1
+  positiveY: 1
+  negativeZ: 1
+  positiveZ: 1
 --- !u!65 &7628177817021945768
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -226,7 +232,7 @@ GameObject:
   - component: {fileID: 1619877941462117874}
   - component: {fileID: 8616445396585688914}
   - component: {fileID: 8099540138583388053}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: PosZ
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -302,7 +308,7 @@ GameObject:
   - component: {fileID: 5814424604924153147}
   - component: {fileID: 860010538011850155}
   - component: {fileID: 8489379658209410564}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: NegX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -378,7 +384,7 @@ GameObject:
   - component: {fileID: 5648283405867182815}
   - component: {fileID: 7653568217393924054}
   - component: {fileID: 3748686326784425606}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: PosX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -454,7 +460,7 @@ GameObject:
   - component: {fileID: 5180639794782530888}
   - component: {fileID: 4047150927527269500}
   - component: {fileID: 5895798278121877075}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: PosY
   m_TagString: Untagged
   m_Icon: {fileID: 0}
