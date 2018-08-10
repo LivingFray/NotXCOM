@@ -5,19 +5,6 @@ using System;
 using TMPro;
 
 public class GameController : MonoBehaviour {
-    public Material baseMaterial;
-    public Material darkMaterial;
-    public Material startMaterial;
-    public Material endMaterial;
-
-    public Material checkingMaterial;
-
-    private bool placingStart = true;
-
-    public GameObject line;
-
-    public bool clearLOS = true;
-
     public int maxClimbHeight = 2;
     public int maxFallHeight = 4;
 
@@ -35,23 +22,15 @@ public class GameController : MonoBehaviour {
 
     private int currentTeam = 0;
 
-
     Board board;
 
-
-    // Use this for initialization
     void Start() {
         //Find board in game controller object
         board = GetComponent<Board>();
         if(board == null) {
             Debug.LogError("Could not find board in controller");
         }
-        /*
-        //Initialise map
-        board.CreateBoard(20, 5, 20);
-        //Create map
-        board.GenerateTestBoard();
-        */
+        //Load board from editor
         board.LoadBoard(GameObject.Find("Board"));
         //Create teams
         AddTeams();
@@ -61,7 +40,7 @@ public class GameController : MonoBehaviour {
         }
         //Start game
 
-        //Turn off entity select as nno entity is selected
+        //Turn off entity select as no entity is selected
         entitySelect.SetActive(false);
     }
 
@@ -112,10 +91,6 @@ public class GameController : MonoBehaviour {
     }
 
     private void Update() {
-        //Toggle begin/end node placement
-        if (Input.GetKeyDown(KeyCode.Space)) {
-            placingStart = !placingStart;
-        }
         teams[currentTeam].Update();
     }
 
