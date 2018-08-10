@@ -68,7 +68,7 @@ public class Tile {
     //May or may not exist, refers to the physical representation of the tile
     public GameObject TileObject { get { return _tile; } set {
             _tile = value;
-            _tile.GetComponent<TileInput>().tileController = this;
+            _tile.GetComponent<TileInput>().tile = this;
         } }
 
     public Tile(GameController controller) {

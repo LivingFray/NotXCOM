@@ -163,7 +163,7 @@ GameObject:
   - component: {fileID: 4903026271178173598}
   - component: {fileID: 7889254905392203136}
   - component: {fileID: 7628177817021945768}
-  m_Layer: 9
+  m_Layer: 0
   m_Name: Tile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -202,12 +202,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03f02ea1d850a4d4792741204a0c803d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  negativeX: 1
-  positiveX: 1
-  negativeY: 1
-  positiveY: 1
-  negativeZ: 1
-  positiveZ: 1
+  negativeX: 2
+  positiveX: 2
+  negativeY: 2
+  positiveY: 2
+  negativeZ: 2
+  positiveZ: 2
+  lowCoverMaterial: {fileID: 2100000, guid: 1d0dcf5780ab5494c84258cad3f2e3e1, type: 2}
+  highCoverMaterial: {fileID: 2100000, guid: 38858ff2d41bef44296a1de9b26ea85f, type: 2}
 --- !u!65 &7628177817021945768
 BoxCollider:
   m_ObjectHideFlags: 0

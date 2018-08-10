@@ -5,18 +5,28 @@ using UnityEditor;
 
 public class TileInput : MonoBehaviour {
 
-    public Tile tileController;
+    [HideInInspector]
+    public Tile tile;
 
-    public bool negativeX;
-    public bool positiveX;
-    public bool negativeY;
-    public bool positiveY;
-    public bool negativeZ;
-    public bool positiveZ;
+    [Range(0,2)]
+    public byte negativeX;
+    [Range(0, 2)]
+    public byte positiveX;
+    [Range(0, 2)]
+    public byte negativeY;
+    [Range(0, 2)]
+    public byte positiveY;
+    [Range(0, 2)]
+    public byte negativeZ;
+    [Range(0, 2)]
+    public byte positiveZ;
+
+    public Material lowCoverMaterial;
+    public Material highCoverMaterial;
 
     private void OnMouseOver() {
         if (Input.GetMouseButtonDown(1)) {
-            tileController.TileClicked();
+            tile.TileClicked();
         }
     }
 
@@ -25,14 +35,26 @@ public class TileInput : MonoBehaviour {
     }
 
     public void UpdateFaces() {
-        transform.Find("NegX").gameObject.SetActive(negativeX);
-        transform.Find("PosX").gameObject.SetActive(positiveX);
-        transform.Find("NegY").gameObject.SetActive(negativeY);
-        transform.Find("PosY").gameObject.SetActive(positiveY);
-        transform.Find("NegZ").gameObject.SetActive(negativeZ);
-        transform.Find("PosZ").gameObject.SetActive(positiveZ);
+        UpdateFace(transform.Find("NegX").gameObject, negativeX);
+        UpdateFace(transform.Find("PosX").gameObject, positiveX);
+        UpdateFace(transform.Find("NegZ").gameObject, negativeZ);
+        UpdateFace(transform.Find("PosZ").gameObject, positiveZ);
+        transform.Find("NegY").gameObject.SetActive(negativeY != 0);
+        transform.Find("PosY").gameObject.SetActive(positiveY != 0);
         //Handle floor hitbox
-        GetComponent<BoxCollider>().enabled = negativeY;
+        GetComponent<BoxCollider>().enabled = negativeY != 0;
+    }
+
+    void UpdateFace(GameObject face, byte cover) {
+        if(cover == 0) {
+            face.SetActive(false);
+        } else if(cover == 1) {
+            face.SetActive(true);
+            face.GetComponent<Renderer>().material = lowCoverMaterial;
+        } else {
+            face.SetActive(true);
+            face.GetComponent<Renderer>().material = highCoverMaterial;
+        }
     }
 
     [MenuItem("NotXCOM/Autogenerate Tiles", true)]
@@ -88,12 +110,13 @@ public class TileInput : MonoBehaviour {
         GameObject tilePrefab = Resources.Load<GameObject>("Tile");
         GameObject tile = Instantiate(tilePrefab, pos, Quaternion.identity, parent);
         TileInput tileInput = tile.GetComponent<TileInput>();
-        tileInput.negativeX = isNegX;
-        tileInput.positiveX = isPosX;
-        tileInput.negativeY = isNegY;
-        tileInput.positiveY = isPosY;
-        tileInput.negativeZ = isNegZ;
-        tileInput.positiveZ = isPosZ;
+        //Default edges that exist to high cover, user can change this on a per instance basis if wrong
+        tileInput.negativeX = isNegX ? (byte)2 : (byte)0;
+        tileInput.positiveX = isPosX ? (byte)2 : (byte)0;
+        tileInput.negativeY = isNegY ? (byte)2 : (byte)0;
+        tileInput.positiveY = isPosY ? (byte)2 : (byte)0;
+        tileInput.negativeZ = isNegZ ? (byte)2 : (byte)0;
+        tileInput.positiveZ = isPosZ ? (byte)2 : (byte)0;
         tileInput.UpdateFaces();
     }
 }

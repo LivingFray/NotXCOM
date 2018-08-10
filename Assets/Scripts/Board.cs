@@ -83,7 +83,26 @@ public class Board : MonoBehaviour {
         Debug.Log("Transforming board...");
         board.transform.position -= new Vector3(minX, minY, minZ);
         Debug.Log("Creating internal board representation");
-        CreateBoard(maxX - minX, maxY - minY, maxZ - minZ);
+        CreateBoard(1 + maxX - minX, 1 + maxY - minY, 1 + maxZ - minZ);
+        Debug.Log("Loading tile collision data...");
+        foreach(TileInput tile in tiles) {
+            AddCover(tile);
+        }
+    }
+
+    void AddCover(TileInput tileInput) {
+        Tile tile = GetTile(Vector3Int.RoundToInt(tileInput.transform.position));
+        tile.TileObject = tileInput.gameObject;
+        if(tile == null) {
+            Debug.Log(tileInput.transform.position);
+        }
+        Tile.Cover c = tile.cover;
+        c.negativeX = Math.Max(c.negativeX, tileInput.negativeX);
+        c.positiveX = Math.Max(c.positiveX, tileInput.positiveX);
+        c.negativeY = Math.Max(c.negativeY, tileInput.negativeY);
+        c.positiveY = Math.Max(c.positiveY, tileInput.positiveY);
+        c.negativeZ = Math.Max(c.negativeX, tileInput.negativeZ);
+        c.positiveZ = Math.Max(c.positiveZ, tileInput.positiveZ);
     }
 
     #region LOS
